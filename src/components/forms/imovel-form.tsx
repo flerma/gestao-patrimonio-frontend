@@ -9,6 +9,7 @@ import { z } from "zod";
 import {
   STATUS_IMOVEL,
   TIPO_IMOVEL,
+  type Endereco,
   type ImovelRequest,
   type ImovelResponse,
 } from "@/lib/types";
@@ -18,6 +19,7 @@ import { useUsuarios } from "@/hooks/use-usuarios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+import { CepField } from "@/components/forms/cep-field";
 import {
   SelectField,
   TextField,
@@ -79,6 +81,25 @@ export function ImovelForm({ imovel }: { imovel?: ImovelResponse }) {
     resolver: zodResolver(schema),
     defaultValues: toDefaults(imovel) as FormValues,
   });
+
+  const preencherEndereco = (endereco: Endereco) => {
+    form.setValue("endereco.logradouro", endereco.logradouro ?? "", {
+      shouldDirty: true,
+    });
+    form.setValue("endereco.bairro", endereco.bairro ?? "", {
+      shouldDirty: true,
+    });
+    form.setValue("endereco.cidade", endereco.cidade ?? "", {
+      shouldDirty: true,
+    });
+    form.setValue("endereco.estado", endereco.estado ?? "", {
+      shouldDirty: true,
+    });
+    if (endereco.pais) {
+      form.setValue("endereco.pais", endereco.pais, { shouldDirty: true });
+    }
+    form.setFocus("endereco.numero");
+  };
 
   const onSubmit = (values: FormValues) => {
     const payload: ImovelRequest = {
@@ -143,7 +164,12 @@ export function ImovelForm({ imovel }: { imovel?: ImovelResponse }) {
 
         <Card>
           <CardContent className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-3">
-            <TextField control={form.control} name="endereco.cep" label="CEP" />
+            <CepField
+              control={form.control}
+              name="endereco.cep"
+              label="CEP"
+              onResolved={preencherEndereco}
+            />
             <TextField
               control={form.control}
               name="endereco.logradouro"

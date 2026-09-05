@@ -8,6 +8,7 @@ import { z } from "zod";
 import {
   STATUS_INQUILINO,
   TIPO_PESSOA,
+  type Endereco,
   type InquilinoRequest,
   type InquilinoResponse,
 } from "@/lib/types";
@@ -21,6 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+import { CepField } from "@/components/forms/cep-field";
 import {
   SelectField,
   TextAreaField,
@@ -91,6 +93,26 @@ export function InquilinoForm({
     resolver: zodResolver(schema),
     defaultValues: toDefaults(inquilino) as FormValues,
   });
+
+  const preencherEndereco = (endereco: Endereco) => {
+    form.setValue("endereco.logradouro", endereco.logradouro ?? "", {
+      shouldDirty: true,
+    });
+    form.setValue("endereco.bairro", endereco.bairro ?? "", {
+      shouldDirty: true,
+    });
+    form.setValue("endereco.cidade", endereco.cidade ?? "", {
+      shouldDirty: true,
+    });
+    form.setValue("endereco.estado", endereco.estado ?? "", {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    if (endereco.pais) {
+      form.setValue("endereco.pais", endereco.pais, { shouldDirty: true });
+    }
+    form.setFocus("endereco.numero");
+  };
 
   const onSubmit = (values: FormValues) => {
     const endereco = Object.fromEntries(
@@ -168,7 +190,12 @@ export function InquilinoForm({
             <CardTitle className="text-base">Endereço</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 p-6 pt-0 sm:grid-cols-2 lg:grid-cols-3">
-            <TextField control={form.control} name="endereco.cep" label="CEP" />
+            <CepField
+              control={form.control}
+              name="endereco.cep"
+              label="CEP"
+              onResolved={preencherEndereco}
+            />
             <TextField
               control={form.control}
               name="endereco.logradouro"
