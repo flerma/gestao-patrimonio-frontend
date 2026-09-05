@@ -141,6 +141,7 @@ export interface InquilinoResponse {
   email?: string | null;
   telefone?: string | null;
   dataNascimento?: IsoDate | null;
+  endereco?: Endereco | null;
   observacoes?: string | null;
   status: StatusInquilino;
   dataCriacao: IsoDateTime;
@@ -154,6 +155,7 @@ export interface InquilinoRequest {
   email?: string | null;
   telefone?: string | null;
   dataNascimento?: IsoDate | null;
+  endereco?: Endereco | null;
   observacoes?: string | null;
   status?: StatusInquilino | null;
 }

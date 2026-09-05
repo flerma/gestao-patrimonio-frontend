@@ -28,8 +28,14 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="min-h-screen antialiased">
+    <html
+      lang="pt-BR"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      {/* suppressHydrationWarning: extensões do navegador (ex.: Grammarly)
+          injetam atributos no <body> antes do React hidratar. */}
+      <body className="min-h-screen antialiased" suppressHydrationWarning>
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

@@ -50,7 +50,15 @@ export default function InquilinosPage() {
     const lista = data ?? [];
     if (!termo) return lista;
     return lista.filter((inq) =>
-      [inq.nome, inq.documento, inq.email, inq.telefone]
+      [
+        inq.nome,
+        inq.documento,
+        inq.email,
+        inq.telefone,
+        inq.endereco?.cidade,
+        inq.endereco?.estado,
+        inq.endereco?.bairro,
+      ]
         .filter(Boolean)
         .some((campo) => campo!.toLowerCase().includes(termo)),
     );
@@ -110,6 +118,7 @@ export default function InquilinosPage() {
                   <TableHead>Tipo</TableHead>
                   <TableHead>Documento</TableHead>
                   <TableHead>Contato</TableHead>
+                  <TableHead>Localização</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Cadastro</TableHead>
                   <TableHead className="w-10" />
@@ -132,6 +141,11 @@ export default function InquilinosPage() {
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {inq.email || inq.telefone || "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {[inq.endereco?.cidade, inq.endereco?.estado]
+                        .filter(Boolean)
+                        .join(" / ") || "—"}
                     </TableCell>
                     <TableCell>
                       <Badge variant={statusInquilinoVariant[inq.status]}>

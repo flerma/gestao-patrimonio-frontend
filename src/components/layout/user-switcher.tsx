@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { UserRound } from "lucide-react";
 
 import { useSelectedUser } from "@/components/providers";
@@ -12,43 +13,47 @@ import {
 } from "@/components/ui/select";
 import { useUsuarios } from "@/hooks/use-usuarios";
 
-const ALL_VALUE = "__all__";
-
-export function UserSwitcher({ compact = false }: { compact?: boolean }) {
+export function UserSwitcher() {
   const { usuarioId, setUsuarioId } = useSelectedUser();
   const { data: usuarios, isLoading } = useUsuarios();
 
+  // Mantém sempre um usuário selecionado (o primeiro, se nenhum válido).
+  React.useEffect(() => {
+    if (!usuarios || usuarios.length === 0) return;
+    if (!usuarioId || !usuarios.some((u) => u.id === usuarioId)) {
+      setUsuarioId(usuarios[0].id);
+    }
+  }, [usuarios, usuarioId, setUsuarioId]);
+
+  const semUsuarios = !isLoading && (!usuarios || usuarios.length === 0);
+
   return (
-    <div className={compact ? "" : "px-3 pb-3 pt-1"}>
-      {!compact && (
-        <p className="mb-1.5 px-1 text-xs font-medium uppercase tracking-wide text-sidebar-muted">
-          Proprietário
-        </p>
-      )}
+    <div className="px-3 pb-3 pt-1">
       <Select
-        value={usuarioId ?? ALL_VALUE}
-        onValueChange={(value) =>
-          setUsuarioId(value === ALL_VALUE ? null : value)
-        }
+        value={usuarioId ?? ""}
+        onValueChange={setUsuarioId}
+        disabled={isLoading || semUsuarios}
       >
         <SelectTrigger className="h-9 border-sidebar-border bg-sidebar-accent/60 text-sidebar-foreground [&>span]:truncate">
           <span className="flex items-center gap-2 overflow-hidden">
             <UserRound className="size-4 shrink-0" />
-            <SelectValue placeholder="Selecione" />
+            <SelectValue
+              placeholder={isLoading ? "Carregando…" : "Selecione o usuário"}
+            />
           </span>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ALL_VALUE}>Todos os proprietários</SelectItem>
-          {isLoading && (
-            <SelectItem value="loading" disabled>
-              Carregando…
+          {semUsuarios ? (
+            <SelectItem value="__none__" disabled>
+              Nenhum usuário cadastrado
             </SelectItem>
+          ) : (
+            usuarios?.map((usuario) => (
+              <SelectItem key={usuario.id} value={usuario.id}>
+                {usuario.nome}
+              </SelectItem>
+            ))
           )}
-          {usuarios?.map((usuario) => (
-            <SelectItem key={usuario.id} value={usuario.id}>
-              {usuario.nome}
-            </SelectItem>
-          ))}
         </SelectContent>
       </Select>
     </div>

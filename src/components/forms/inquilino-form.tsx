@@ -14,7 +14,12 @@ import {
 import { statusInquilinoLabels, tipoPessoaLabels } from "@/lib/labels";
 import { useSalvarInquilino } from "@/hooks/use-inquilinos";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import {
   SelectField,
@@ -36,6 +41,16 @@ const schema = z.object({
   telefone: z.string().optional(),
   dataNascimento: z.string().optional(),
   status: z.enum(STATUS_INQUILINO),
+  endereco: z.object({
+    cep: z.string().optional(),
+    logradouro: z.string().optional(),
+    numero: z.string().optional(),
+    complemento: z.string().optional(),
+    bairro: z.string().optional(),
+    cidade: z.string().optional(),
+    estado: z.string().max(2, "Use a sigla (ex.: SP)").optional(),
+    pais: z.string().optional(),
+  }),
   observacoes: z.string().max(1000).optional(),
 });
 
@@ -50,6 +65,16 @@ function toDefaults(inquilino?: InquilinoResponse): Partial<FormValues> {
     telefone: inquilino?.telefone ?? "",
     dataNascimento: inquilino?.dataNascimento ?? "",
     status: inquilino?.status ?? "ATIVO",
+    endereco: {
+      cep: inquilino?.endereco?.cep ?? "",
+      logradouro: inquilino?.endereco?.logradouro ?? "",
+      numero: inquilino?.endereco?.numero ?? "",
+      complemento: inquilino?.endereco?.complemento ?? "",
+      bairro: inquilino?.endereco?.bairro ?? "",
+      cidade: inquilino?.endereco?.cidade ?? "",
+      estado: inquilino?.endereco?.estado ?? "",
+      pais: inquilino?.endereco?.pais ?? "Brasil",
+    },
     observacoes: inquilino?.observacoes ?? "",
   };
 }
@@ -68,6 +93,11 @@ export function InquilinoForm({
   });
 
   const onSubmit = (values: FormValues) => {
+    const endereco = Object.fromEntries(
+      Object.entries(values.endereco).map(([k, v]) => [k, v || undefined]),
+    );
+    const temEndereco = Object.values(endereco).some(Boolean);
+
     const payload: InquilinoRequest = {
       tipoPessoa: values.tipoPessoa,
       nome: values.nome,
@@ -76,6 +106,9 @@ export function InquilinoForm({
       telefone: values.telefone || undefined,
       dataNascimento: values.dataNascimento || undefined,
       status: values.status,
+      endereco: temEndereco
+        ? (endereco as InquilinoRequest["endereco"])
+        : undefined,
       observacoes: values.observacoes || undefined,
     };
     salvar.mutate(payload, {
@@ -127,11 +160,61 @@ export function InquilinoForm({
               label="Data de nascimento"
               type="date"
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Endereço</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 p-6 pt-0 sm:grid-cols-2 lg:grid-cols-3">
+            <TextField control={form.control} name="endereco.cep" label="CEP" />
+            <TextField
+              control={form.control}
+              name="endereco.logradouro"
+              label="Logradouro"
+              className="sm:col-span-2"
+            />
+            <TextField
+              control={form.control}
+              name="endereco.numero"
+              label="Número"
+            />
+            <TextField
+              control={form.control}
+              name="endereco.complemento"
+              label="Complemento"
+            />
+            <TextField
+              control={form.control}
+              name="endereco.bairro"
+              label="Bairro"
+            />
+            <TextField
+              control={form.control}
+              name="endereco.cidade"
+              label="Cidade"
+            />
+            <TextField
+              control={form.control}
+              name="endereco.estado"
+              label="Estado (UF)"
+              placeholder="SP"
+            />
+            <TextField
+              control={form.control}
+              name="endereco.pais"
+              label="País"
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
             <TextAreaField
               control={form.control}
               name="observacoes"
               label="Observações"
-              className="sm:col-span-2"
             />
           </CardContent>
         </Card>

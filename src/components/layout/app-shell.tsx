@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Building2, Menu, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Building2, ChevronsLeft, ChevronsRight, Menu } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,11 +21,21 @@ import {
 
 const COLLAPSE_KEY = "gpi:sidebar-collapsed";
 
-function Brand({ collapsed = false }: { collapsed?: boolean }) {
+function Brand({
+  collapsed = false,
+  className,
+}: {
+  collapsed?: boolean;
+  className?: string;
+}) {
   return (
     <Link
       href="/"
-      className="flex items-center gap-2.5 px-4 py-4 text-sidebar-foreground"
+      className={cn(
+        "flex items-center gap-2.5 py-4 text-sidebar-foreground",
+        collapsed ? "justify-center px-0" : "px-4",
+        className,
+      )}
     >
       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
         <Building2 className="size-5" />
@@ -76,26 +86,33 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           collapsed ? "w-[76px]" : "w-64",
         )}
       >
-        <Brand collapsed={collapsed} />
-        {!collapsed && <UserSwitcher />}
-        <SidebarNav />
-        <div className="border-t border-sidebar-border p-3">
+        <div
+          className={cn(
+            "flex border-b border-sidebar-border",
+            collapsed ? "flex-col items-center gap-1 pb-2" : "items-center pr-2",
+          )}
+        >
+          <Brand
+            collapsed={collapsed}
+            className={collapsed ? undefined : "flex-1"}
+          />
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={toggleCollapsed}
-            className="w-full justify-start gap-3 text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+            aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+            title={collapsed ? "Expandir menu" : "Recolher menu"}
+            className="shrink-0 text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
           >
             {collapsed ? (
-              <PanelLeft className="size-5" />
+              <ChevronsRight className="size-5" />
             ) : (
-              <>
-                <PanelLeftClose className="size-5" />
-                <span>Recolher menu</span>
-              </>
+              <ChevronsLeft className="size-5" />
             )}
           </Button>
         </div>
+        {!collapsed && <UserSwitcher />}
+        <SidebarNav collapsed={collapsed} />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
