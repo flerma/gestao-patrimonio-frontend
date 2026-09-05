@@ -14,6 +14,10 @@ import {
 } from "@/components/ui/sheet";
 import { SidebarNav } from "./sidebar-nav";
 import { UserSwitcher } from "./user-switcher";
+import {
+  NavigationProgressProvider,
+  RouteLoadingOverlay,
+} from "./navigation-progress";
 
 const COLLAPSE_KEY = "gpi:sidebar-collapsed";
 
@@ -63,6 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
+    <NavigationProgressProvider>
     <div className="flex min-h-screen w-full bg-muted/40">
       {/* Sidebar desktop */}
       <aside
@@ -115,10 +120,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          {children}
+        <main className="relative flex flex-1 flex-col">
+          <RouteLoadingOverlay />
+          <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            {children}
+          </div>
         </main>
       </div>
     </div>
+    </NavigationProgressProvider>
   );
 }

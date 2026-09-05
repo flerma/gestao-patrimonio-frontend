@@ -2,15 +2,42 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { navItems } from "./nav-config";
+import { useReportLinkNavigation } from "./navigation-progress";
+import { navItems, type NavItem } from "./nav-config";
 
-interface SidebarNavProps {
-  onNavigate?: () => void;
+function NavItemBody({ item, active }: { item: NavItem; active: boolean }) {
+  const pending = useReportLinkNavigation();
+  const Icon = item.icon;
+
+  return (
+    <span
+      className={cn(
+        "flex flex-1 items-center gap-3",
+        pending && "opacity-90",
+      )}
+    >
+      {pending ? (
+        <Loader2 className="size-5 shrink-0 animate-spin" />
+      ) : (
+        <Icon className="size-5 shrink-0" />
+      )}
+      <span className="truncate">{item.title}</span>
+      {pending && (
+        <span className="ml-auto text-xs font-normal text-sidebar-muted">
+          abrindo…
+        </span>
+      )}
+      {!pending && active && (
+        <span className="ml-auto size-1.5 shrink-0 rounded-full bg-primary" />
+      )}
+    </span>
+  );
 }
 
-export function SidebarNav({ onNavigate }: SidebarNavProps) {
+export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
@@ -20,7 +47,6 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
           item.href === "/"
             ? pathname === "/"
             : pathname.startsWith(item.href);
-        const Icon = item.icon;
         return (
           <Link
             key={item.href}
@@ -28,14 +54,13 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
               active
                 ? "bg-sidebar-accent text-sidebar-foreground"
                 : "text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
             )}
           >
-            <Icon className="size-5 shrink-0" />
-            <span className="truncate">{item.title}</span>
+            <NavItemBody item={item} active={active} />
           </Link>
         );
       })}

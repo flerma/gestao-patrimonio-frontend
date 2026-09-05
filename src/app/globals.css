@@ -124,3 +124,13 @@
     -webkit-font-smoothing: antialiased;
   }
 }
+
+/* Barra de progresso de navegação (indeterminada). */
+@keyframes nav-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
