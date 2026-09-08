@@ -24,7 +24,9 @@ imóveis, inquilinos, contratos e usuários.
 
    ```bash
    npm install
-   npm run dev
+   npm run dev      # website
+   npm run android  # emulador Android
+   npm run ios      # simulador iOS (precisa de macOS)
    ```
 
 3. Acesse `http://localhost:3000`.
