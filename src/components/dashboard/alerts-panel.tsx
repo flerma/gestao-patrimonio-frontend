@@ -1,6 +1,8 @@
+import Link from "next/link";
 import {
   AlertTriangle,
   BellRing,
+  ChevronRight,
   Info,
   OctagonAlert,
 } from "lucide-react";
@@ -54,6 +56,36 @@ export function AlertsPanel({ alertas }: { alertas: Alerta[] }) {
         ) : (
           alertas.map((alerta) => {
             const { icon: Icon, className } = config[alerta.severidade];
+            const body = (
+              <>
+                <Icon className="mt-0.5 size-4 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-foreground">{alerta.titulo}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {alerta.descricao}
+                  </p>
+                </div>
+                {alerta.href && (
+                  <ChevronRight className="mt-0.5 size-4 shrink-0 self-center" />
+                )}
+              </>
+            );
+
+            if (alerta.href) {
+              return (
+                <Link
+                  key={alerta.id}
+                  href={alerta.href}
+                  className={cn(
+                    "flex gap-3 rounded-lg border p-3 text-sm transition-opacity hover:opacity-80",
+                    className,
+                  )}
+                >
+                  {body}
+                </Link>
+              );
+            }
+
             return (
               <div
                 key={alerta.id}
@@ -62,13 +94,7 @@ export function AlertsPanel({ alertas }: { alertas: Alerta[] }) {
                   className,
                 )}
               >
-                <Icon className="mt-0.5 size-4 shrink-0" />
-                <div className="min-w-0">
-                  <p className="font-medium text-foreground">{alerta.titulo}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {alerta.descricao}
-                  </p>
-                </div>
+                {body}
               </div>
             );
           })

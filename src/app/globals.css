@@ -4,43 +4,44 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.65rem;
+  --radius: 0.8rem;
 
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(222.2 47.4% 11.2%);
+  /* Paleta "Azul sereno": fundo off-white, cards brancos, azul calmo. */
+  --background: hsl(216 46% 98%);
+  --foreground: hsl(222 32% 16%);
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(222.2 47.4% 11.2%);
+  --card-foreground: hsl(222 32% 16%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(222.2 47.4% 11.2%);
-  --primary: hsl(221.2 83.2% 53.3%);
-  --primary-foreground: hsl(210 40% 98%);
-  --secondary: hsl(210 40% 96.1%);
-  --secondary-foreground: hsl(222.2 47.4% 11.2%);
-  --muted: hsl(210 40% 96.1%);
-  --muted-foreground: hsl(215.4 16.3% 44.9%);
-  --accent: hsl(210 40% 96.1%);
-  --accent-foreground: hsl(222.2 47.4% 11.2%);
-  --destructive: hsl(0 72.2% 50.6%);
-  --destructive-foreground: hsl(210 40% 98%);
-  --success: hsl(142.1 70.6% 40.3%);
-  --success-foreground: hsl(210 40% 98%);
-  --warning: hsl(32.1 94.6% 43.7%);
-  --warning-foreground: hsl(210 40% 98%);
-  --border: hsl(214.3 31.8% 91.4%);
-  --input: hsl(214.3 31.8% 91.4%);
-  --ring: hsl(221.2 83.2% 53.3%);
+  --popover-foreground: hsl(222 32% 16%);
+  --primary: hsl(217 91% 60%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(216 41% 96%);
+  --secondary-foreground: hsl(222 28% 24%);
+  --muted: hsl(216 41% 96%);
+  --muted-foreground: hsl(216 13% 49%);
+  --accent: hsl(214 100% 96%);
+  --accent-foreground: hsl(217 55% 33%);
+  --destructive: hsl(358 68% 58%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --success: hsl(148 55% 42%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(40 88% 48%);
+  --warning-foreground: hsl(0 0% 100%);
+  --border: hsl(215 38% 93%);
+  --input: hsl(215 33% 89%);
+  --ring: hsl(217 91% 60%);
 
-  --chart-1: hsl(221.2 83.2% 53.3%);
-  --chart-2: hsl(142.1 70.6% 40.3%);
-  --chart-3: hsl(32.1 94.6% 43.7%);
-  --chart-4: hsl(280 65% 60%);
-  --chart-5: hsl(340 75% 55%);
+  --chart-1: hsl(217 91% 60%);
+  --chart-2: hsl(148 55% 44%);
+  --chart-3: hsl(40 88% 52%);
+  --chart-4: hsl(268 60% 64%);
+  --chart-5: hsl(330 68% 62%);
 
-  --sidebar: hsl(222.2 47.4% 11.2%);
-  --sidebar-foreground: hsl(210 40% 96.1%);
-  --sidebar-muted: hsl(215 20.2% 65.1%);
-  --sidebar-accent: hsl(217.2 32.6% 20%);
-  --sidebar-border: hsl(217.2 32.6% 20%);
+  --sidebar: hsl(0 0% 100%);
+  --sidebar-foreground: hsl(222 28% 21%);
+  --sidebar-muted: hsl(216 13% 51%);
+  --sidebar-accent: hsl(214 100% 95%);
+  --sidebar-border: hsl(215 38% 93%);
 }
 
 .dark {
@@ -50,7 +51,7 @@
   --card-foreground: hsl(210 40% 98%);
   --popover: hsl(222.2 47.4% 8%);
   --popover-foreground: hsl(210 40% 98%);
-  --primary: hsl(217.2 91.2% 59.8%);
+  --primary: hsl(217 91% 66%);
   --primary-foreground: hsl(222.2 47.4% 11.2%);
   --secondary: hsl(217.2 32.6% 17.5%);
   --secondary-foreground: hsl(210 40% 98%);
@@ -66,7 +67,7 @@
   --warning-foreground: hsl(222.2 47.4% 11.2%);
   --border: hsl(217.2 32.6% 17.5%);
   --input: hsl(217.2 32.6% 17.5%);
-  --ring: hsl(224.3 76.3% 55%);
+  --ring: hsl(217 80% 62%);
 }
 
 @theme inline {

@@ -1,4 +1,5 @@
-import { Receipt } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Receipt } from "lucide-react";
 
 import type { ResumoPagamentos } from "@/lib/dashboard";
 import { formatCurrency } from "@/lib/format";
@@ -51,11 +52,10 @@ export function RentPaymentsCard({
         ) : (
           <div className="space-y-4">
             <ul className="space-y-2.5">
-              {statusRows.map((row) => (
-                <li
-                  key={row.key}
-                  className="flex items-center justify-between text-sm"
-                >
+              {statusRows.map((row) => {
+                const value = resumo[row.key];
+                const linkToAtraso = row.key === "emAtraso" && value > 0;
+                const label = (
                   <span className="flex items-center gap-2 text-muted-foreground">
                     <span
                       className={cn("size-2.5 rounded-full", row.dot)}
@@ -63,11 +63,35 @@ export function RentPaymentsCard({
                     />
                     {row.label}
                   </span>
-                  <span className="font-semibold tabular-nums">
-                    {resumo[row.key]}
-                  </span>
-                </li>
-              ))}
+                );
+
+                if (linkToAtraso) {
+                  return (
+                    <li key={row.key}>
+                      <Link
+                        href="/alugueis-atrasados"
+                        className="flex items-center justify-between text-sm transition-opacity hover:opacity-80"
+                      >
+                        {label}
+                        <span className="flex items-center gap-1 font-semibold tabular-nums text-destructive underline underline-offset-2">
+                          {value}
+                          <ArrowUpRight className="size-3.5" aria-hidden />
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                }
+
+                return (
+                  <li
+                    key={row.key}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    {label}
+                    <span className="font-semibold tabular-nums">{value}</span>
+                  </li>
+                );
+              })}
             </ul>
 
             <Separator />

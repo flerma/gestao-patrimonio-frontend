@@ -76,7 +76,7 @@ export default function DashboardPage() {
       resumo: calcularResumo(imoveisUsuario, contratosUsuario),
       resumoPagamentos: calcularResumoPagamentos(pagamentos, contratosPermitidos),
       evolucao: calcularEvolucao(contratosUsuario, 12),
-      alertas: gerarAlertas(imoveisUsuario, contratosUsuario),
+      alertas: gerarAlertas(imoveisUsuario, contratosUsuario, pagamentos),
     };
   }, [imoveisQuery.data, contratosQuery.data, pagamentosQuery.data, usuarioId]);
 
