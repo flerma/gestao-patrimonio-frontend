@@ -2,12 +2,15 @@
 
 import * as React from "react";
 import {
+  MutationCache,
+  QueryCache,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { useRouter } from "next/navigation";
 
-import { ApiError } from "@/lib/api";
+import { ApiError, authApi, type AuthUsuario } from "@/lib/api";
 import { Toaster } from "@/components/ui/sonner";
 
 const SELECTED_USER_KEY = "gpi:selected-usuario";
@@ -26,8 +29,99 @@ export function useSelectedUser() {
   return React.useContext(SelectedUserContext);
 }
 
+// ---------- Autenticação ----------
+// Contexto de autenticação (login/cadastro JWT). Não confundir com
+// `SelectedUserContext` acima, que é o filtro de "proprietário" do
+// dashboard — um conceito completamente diferente que continua existindo.
+
+interface AuthContextValue {
+  usuario: AuthUsuario | null;
+  carregando: boolean;
+  refetch: () => Promise<void>;
+  login: (usuario: string, senha: string) => Promise<AuthUsuario>;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = React.createContext<AuthContextValue>({
+  usuario: null,
+  carregando: true,
+  refetch: async () => {},
+  login: async () => {
+    throw new Error("AuthProvider ausente");
+  },
+  logout: async () => {},
+});
+
+export function useAuth() {
+  return React.useContext(AuthContext);
+}
+
+function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const [usuario, setUsuario] = React.useState<AuthUsuario | null>(null);
+  const [carregando, setCarregando] = React.useState(true);
+
+  const refetch = React.useCallback(async () => {
+    try {
+      const { usuario: current } = await authApi.me();
+      setUsuario(current);
+    } catch {
+      // 401 (ou backend fora do ar): trata como deslogado. O redirecionamento
+      // forçado de rotas protegidas fica a cargo de `src/proxy.ts`.
+      setUsuario(null);
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  const login = React.useCallback(async (usuarioLogin: string, senha: string) => {
+    const { usuario: logado } = await authApi.login({
+      usuario: usuarioLogin,
+      senha,
+    });
+    setUsuario(logado);
+    return logado;
+  }, []);
+
+  const logout = React.useCallback(async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // Ignora falhas do backend — o objetivo é sempre encerrar a sessão local.
+    }
+    setUsuario(null);
+    router.push("/login");
+  }, [router]);
+
+  const value = React.useMemo(
+    () => ({ usuario, carregando, refetch, login, logout }),
+    [usuario, carregando, refetch, login, logout],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+function handleGlobalQueryError(error: unknown) {
+  if (
+    error instanceof ApiError &&
+    error.status === 401 &&
+    typeof window !== "undefined"
+  ) {
+    const { pathname } = window.location;
+    if (pathname !== "/login" && pathname !== "/cadastro") {
+      window.location.href = "/login";
+    }
+  }
+}
+
 function makeQueryClient() {
   return new QueryClient({
+    queryCache: new QueryCache({ onError: handleGlobalQueryError }),
+    mutationCache: new MutationCache({ onError: handleGlobalQueryError }),
     defaultOptions: {
       queries: {
         staleTime: 30_000,
@@ -84,9 +178,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SelectedUserContext.Provider value={value}>
-        {children}
-      </SelectedUserContext.Provider>
+      <AuthProvider>
+        <SelectedUserContext.Provider value={value}>
+          {children}
+        </SelectedUserContext.Provider>
+      </AuthProvider>
       <Toaster />
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
     </QueryClientProvider>

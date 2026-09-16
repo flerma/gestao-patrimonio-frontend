@@ -1,8 +1,11 @@
 /**
  * URL base da API.
- * - Vazio (padrão): usa caminho relativo `/api/...`, atendido pelo proxy do
- *   Next.js (ver `next.config.ts` / variável `API_PROXY_TARGET`). Evita CORS.
- * - Definido (ex.: http://localhost:8080): chama a API diretamente. Nesse caso
+ * - Vazio (padrão): usa caminho relativo `/api/...`, atendido pelo Route
+ *   Handler catch-all `src/app/api/[...path]/route.ts` (que injeta o
+ *   `Authorization: Bearer <token>` a partir do cookie httpOnly e encaminha
+ *   para `API_PROXY_TARGET`, ver `src/lib/api/backend-url.ts`). Evita CORS.
+ * - Definido (ex.: http://localhost:8080): chama a API diretamente do
+ *   navegador, SEM o header de autenticação injetado pelo proxy. Nesse caso
  *   a API precisa liberar CORS para a origem do frontend.
  */
 export const API_BASE_URL = (

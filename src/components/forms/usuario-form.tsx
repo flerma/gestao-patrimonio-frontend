@@ -28,6 +28,7 @@ import {
 const schema = z.object({
   nome: z.string().trim().min(1, "Informe o nome"),
   email: z.string().trim().email("E-mail inválido"),
+  telefone: z.string().optional(),
   provedorAutenticacao: z.enum(PROVEDOR_AUTENTICACAO),
   idUsuarioProvedor: z.string().optional(),
   status: z.enum(STATUS_USUARIO),
@@ -39,6 +40,7 @@ function toDefaults(usuario?: UsuarioResponse): Partial<FormValues> {
   return {
     nome: usuario?.nome ?? "",
     email: usuario?.email ?? "",
+    telefone: usuario?.telefone ?? "",
     provedorAutenticacao: usuario?.provedorAutenticacao ?? "LOCAL",
     idUsuarioProvedor: usuario?.idUsuarioProvedor ?? "",
     status: usuario?.status ?? "ATIVO",
@@ -58,6 +60,7 @@ export function UsuarioForm({ usuario }: { usuario?: UsuarioResponse }) {
     const payload: UsuarioRequest = {
       nome: values.nome,
       email: values.email,
+      telefone: values.telefone || undefined,
       provedorAutenticacao: values.provedorAutenticacao,
       idUsuarioProvedor: values.idUsuarioProvedor || undefined,
       status: values.status,
@@ -76,6 +79,11 @@ export function UsuarioForm({ usuario }: { usuario?: UsuarioResponse }) {
               name="email"
               label="E-mail"
               type="email"
+            />
+            <TextField
+              control={form.control}
+              name="telefone"
+              label="Telefone (opcional)"
             />
             <SelectField
               control={form.control}

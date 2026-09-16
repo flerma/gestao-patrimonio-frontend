@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { Providers } from "@/components/providers";
-import { AppShell } from "@/components/layout/app-shell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,9 +35,7 @@ export default function RootLayout({
       {/* suppressHydrationWarning: extensões do navegador (ex.: Grammarly)
           injetam atributos no <body> antes do React hidratar. */}
       <body className="min-h-screen antialiased" suppressHydrationWarning>
-        <Providers>
-          <AppShell>{children}</AppShell>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

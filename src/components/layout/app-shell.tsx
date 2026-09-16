@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Building2, ChevronsLeft, ChevronsRight, Menu } from "lucide-react";
+import { Building2, ChevronsLeft, ChevronsRight, LogOut, Menu } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/providers";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -18,6 +19,28 @@ import {
   NavigationProgressProvider,
   RouteLoadingOverlay,
 } from "./navigation-progress";
+
+function AuthStatus() {
+  const { usuario, logout } = useAuth();
+
+  return (
+    <div className="flex items-center justify-between gap-2 px-3 pb-1 pt-2 text-sidebar-foreground">
+      <span className="truncate text-xs text-sidebar-muted">
+        Olá, {usuario?.nome ?? "…"}
+      </span>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => logout()}
+        aria-label="Sair"
+        title="Sair"
+        className="size-7 shrink-0 text-sidebar-muted hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+      >
+        <LogOut className="size-4" />
+      </Button>
+    </div>
+  );
+}
 
 const COLLAPSE_KEY = "gpi:sidebar-collapsed";
 
@@ -111,7 +134,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             )}
           </Button>
         </div>
-        {!collapsed && <UserSwitcher />}
+        {!collapsed && (
+          <>
+            <AuthStatus />
+            <UserSwitcher />
+          </>
+        )}
         <SidebarNav collapsed={collapsed} />
       </aside>
 
@@ -127,6 +155,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <SheetContent side="left" className="flex w-72 flex-col p-0">
               <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
               <Brand />
+              <AuthStatus />
               <UserSwitcher />
               <SidebarNav onNavigate={() => setMobileOpen(false)} />
             </SheetContent>
