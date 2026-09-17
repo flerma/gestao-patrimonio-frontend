@@ -24,7 +24,8 @@ imóveis, inquilinos, contratos e usuários.
 
    ```bash
    npm install
-   npm run dev      # website
+   npm run dev      # website — API local (http://localhost:8080)
+   npm run dev:prod # website — API de produção (https://api.gestaoseupatrimonio.com.br)
    npm run android  # emulador Android
    npm run ios      # simulador iOS (precisa de macOS)
    ```
@@ -43,7 +44,9 @@ NEXT_PUBLIC_API_BASE_URL=
 ```
 
 Com o proxy, o frontend chama `/api/*` na própria origem e o Next.js encaminha
-para `API_PROXY_TARGET` (ver `next.config.ts`).
+para `API_PROXY_TARGET` (ver `next.config.ts`). `npm run dev:prod` sobrescreve
+essa variável na hora (via `cross-env`), sem precisar editar o `.env.local`,
+para apontar o mesmo frontend local para a API em produção.
 
 ## Integração REST
 
