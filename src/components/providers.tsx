@@ -13,26 +13,10 @@ import { useRouter } from "next/navigation";
 import { ApiError, authApi, type AuthUsuario } from "@/lib/api";
 import { Toaster } from "@/components/ui/sonner";
 
-const SELECTED_USER_KEY = "gpi:selected-usuario";
-
-interface SelectedUserContextValue {
-  usuarioId: string | null;
-  setUsuarioId: (id: string | null) => void;
-}
-
-const SelectedUserContext = React.createContext<SelectedUserContextValue>({
-  usuarioId: null,
-  setUsuarioId: () => {},
-});
-
-export function useSelectedUser() {
-  return React.useContext(SelectedUserContext);
-}
-
 // ---------- Autenticação ----------
-// Contexto de autenticação (login/cadastro JWT). Não confundir com
-// `SelectedUserContext` acima, que é o filtro de "proprietário" do
-// dashboard — um conceito completamente diferente que continua existindo.
+// Contexto de autenticação (login/cadastro JWT). As telas do dashboard usam
+// o usuário logado (via `useAuth`) para filtrar os dados — não há mais um
+// "usuário selecionado" manual.
 
 interface AuthContextValue {
   usuario: AuthUsuario | null;
@@ -148,41 +132,9 @@ function getQueryClient() {
 export function Providers({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
-  const [usuarioId, setUsuarioIdState] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    // Restaura o proprietário selecionado após a hidratação.
-    try {
-      const stored = window.localStorage.getItem(SELECTED_USER_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (stored) setUsuarioIdState(stored);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  const setUsuarioId = React.useCallback((id: string | null) => {
-    setUsuarioIdState(id);
-    try {
-      if (id) window.localStorage.setItem(SELECTED_USER_KEY, id);
-      else window.localStorage.removeItem(SELECTED_USER_KEY);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  const value = React.useMemo(
-    () => ({ usuarioId, setUsuarioId }),
-    [usuarioId, setUsuarioId],
-  );
-
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SelectedUserContext.Provider value={value}>
-          {children}
-        </SelectedUserContext.Provider>
-      </AuthProvider>
+      <AuthProvider>{children}</AuthProvider>
       <Toaster />
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
     </QueryClientProvider>

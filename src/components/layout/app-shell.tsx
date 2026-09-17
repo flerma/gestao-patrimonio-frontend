@@ -14,7 +14,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SidebarNav } from "./sidebar-nav";
-import { UserSwitcher } from "./user-switcher";
 import {
   NavigationProgressProvider,
   RouteLoadingOverlay,
@@ -134,12 +133,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             )}
           </Button>
         </div>
-        {!collapsed && (
-          <>
-            <AuthStatus />
-            <UserSwitcher />
-          </>
-        )}
+        {!collapsed && <AuthStatus />}
         <SidebarNav collapsed={collapsed} />
       </aside>
 
@@ -156,7 +150,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
               <Brand />
               <AuthStatus />
-              <UserSwitcher />
               <SidebarNav onNavigate={() => setMobileOpen(false)} />
             </SheetContent>
           </Sheet>

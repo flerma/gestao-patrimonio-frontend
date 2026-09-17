@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { useSelectedUser } from "@/components/providers";
+import { useAuth } from "@/components/providers";
 import { PageHeader } from "@/components/page-header";
 import {
   EmptyState,
@@ -29,7 +29,8 @@ import { filtrarPorUsuario, listarAlugueisEmAtraso } from "@/lib/dashboard";
 import { formatCurrency, formatDate, formatMonthLabel } from "@/lib/format";
 
 export default function AlugueisAtrasadosPage() {
-  const { usuarioId } = useSelectedUser();
+  const { usuario } = useAuth();
+  const usuarioId = usuario?.id ?? null;
   const imoveisQuery = useImoveis();
   const contratosQuery = useContratos();
   const pagamentosQuery = usePagamentosAluguel();

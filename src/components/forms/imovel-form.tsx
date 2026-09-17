@@ -15,7 +15,6 @@ import {
 } from "@/lib/types";
 import { statusImovelLabels, tipoImovelLabels } from "@/lib/labels";
 import { useSalvarImovel } from "@/hooks/use-imoveis";
-import { useUsuarios } from "@/hooks/use-usuarios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
@@ -27,7 +26,6 @@ import {
 } from "@/components/forms/form-fields";
 
 const schema = z.object({
-  usuarioId: z.string().min(1, "Selecione o proprietário"),
   nome: z.string().trim().min(1, "Informe o nome do imóvel"),
   tipo: z.enum(TIPO_IMOVEL),
   status: z.enum(STATUS_IMOVEL),
@@ -53,7 +51,6 @@ type FormValues = z.infer<typeof schema>;
 
 function toDefaults(imovel?: ImovelResponse): Partial<FormValues> {
   return {
-    usuarioId: imovel?.usuario?.id ?? "",
     nome: imovel?.nome ?? "",
     tipo: imovel?.tipo,
     status: imovel?.status ?? "DISPONIVEL",
@@ -74,7 +71,6 @@ function toDefaults(imovel?: ImovelResponse): Partial<FormValues> {
 
 export function ImovelForm({ imovel }: { imovel?: ImovelResponse }) {
   const router = useRouter();
-  const { data: usuarios } = useUsuarios();
   const salvar = useSalvarImovel(imovel?.id);
 
   const form = useForm<FormValues>({
@@ -119,16 +115,6 @@ export function ImovelForm({ imovel }: { imovel?: ImovelResponse }) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <Card>
           <CardContent className="grid gap-4 p-6 sm:grid-cols-2">
-            <SelectField
-              control={form.control}
-              name="usuarioId"
-              label="Proprietário"
-              placeholder="Selecione o usuário"
-              options={(usuarios ?? []).map((u) => ({
-                value: u.id,
-                label: u.nome,
-              }))}
-            />
             <TextField
               control={form.control}
               name="nome"

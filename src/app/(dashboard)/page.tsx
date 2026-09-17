@@ -10,7 +10,7 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { useSelectedUser } from "@/components/providers";
+import { useAuth } from "@/components/providers";
 import { PageHeader } from "@/components/page-header";
 import { ErrorState, LoadingState } from "@/components/query-state";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -37,7 +37,6 @@ import {
 import { useImoveis } from "@/hooks/use-imoveis";
 import { useContratos } from "@/hooks/use-contratos";
 import { usePagamentosAluguel } from "@/hooks/use-pagamentos-aluguel";
-import { useUsuarios } from "@/hooks/use-usuarios";
 import {
   calcularEvolucao,
   calcularResumo,
@@ -49,11 +48,11 @@ import { formatCurrency, formatDate, formatPercent } from "@/lib/format";
 import { statusImovelLabels, statusImovelVariant, tipoImovelLabels } from "@/lib/labels";
 
 export default function DashboardPage() {
-  const { usuarioId } = useSelectedUser();
+  const { usuario } = useAuth();
+  const usuarioId = usuario?.id ?? null;
   const imoveisQuery = useImoveis();
   const contratosQuery = useContratos();
   const pagamentosQuery = usePagamentosAluguel();
-  const usuariosQuery = useUsuarios();
 
   const isLoading = imoveisQuery.isLoading || contratosQuery.isLoading;
   const error = imoveisQuery.error ?? contratosQuery.error;
@@ -80,9 +79,7 @@ export default function DashboardPage() {
     };
   }, [imoveisQuery.data, contratosQuery.data, pagamentosQuery.data, usuarioId]);
 
-  const nomeUsuario = usuarioId
-    ? usuariosQuery.data?.find((u) => u.id === usuarioId)?.nome
-    : null;
+  const nomeUsuario = usuario?.nome ?? null;
 
   const aluguelPorImovel = React.useMemo(() => {
     const map = new Map<string, number>();
