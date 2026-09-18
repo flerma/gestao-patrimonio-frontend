@@ -25,8 +25,10 @@ import {
 import { useImoveis } from "@/hooks/use-imoveis";
 import { useContratos } from "@/hooks/use-contratos";
 import { usePagamentosAluguel } from "@/hooks/use-pagamentos-aluguel";
+import { RegistrarPagamentoRow } from "@/components/dashboard/registrar-pagamento-row";
 import { filtrarPorUsuario, listarAlugueisEmAtraso } from "@/lib/dashboard";
 import { formatCurrency, formatDate, formatMonthLabel } from "@/lib/format";
+import type { UUID } from "@/lib/types";
 
 export default function AlugueisAtrasadosPage() {
   const { usuario } = useAuth();
@@ -52,7 +54,15 @@ export default function AlugueisAtrasadosPage() {
     return listarAlugueisEmAtraso(pagamentos, contratos, contratosPermitidos);
   }, [imoveisQuery.data, contratosQuery.data, pagamentosQuery.data, usuarioId]);
 
-  const totalEmAberto = linhas.reduce(
+  // Some da lista assim que marcado como pago, sem esperar o refetch (que
+  // de qualquer forma o excluiria, já que deixa de estar em atraso).
+  const [idsPagos, setIdsPagos] = React.useState<Set<UUID>>(new Set());
+  const linhasExibidas = React.useMemo(
+    () => linhas.filter((l) => !idsPagos.has(l.pagamento.id)),
+    [linhas, idsPagos],
+  );
+
+  const totalEmAberto = linhasExibidas.reduce(
     (acc, l) => acc + Math.max(Number(l.pagamento.saldo ?? 0), 0),
     0,
   );
@@ -81,7 +91,7 @@ export default function AlugueisAtrasadosPage() {
         <LoadingState label="Carregando cobranças…" />
       ) : error && !contratosQuery.data ? (
         <ErrorState error={error} onRetry={retry} />
-      ) : linhas.length === 0 ? (
+      ) : linhasExibidas.length === 0 ? (
         <EmptyState
           title="Nenhum aluguel em atraso"
           description="Todas as cobranças de aluguel estão em dia para este proprietário."
@@ -95,7 +105,7 @@ export default function AlugueisAtrasadosPage() {
                   Cobranças em atraso
                 </p>
                 <p className="mt-1 text-2xl font-semibold tabular-nums">
-                  {linhas.length}
+                  {linhasExibidas.length}
                 </p>
               </CardContent>
             </Card>
@@ -124,10 +134,11 @@ export default function AlugueisAtrasadosPage() {
                       <TableHead className="text-right">Recebido</TableHead>
                       <TableHead className="text-right">Em aberto</TableHead>
                       <TableHead className="w-10" />
+                      <TableHead className="w-10" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {linhas.map(({ pagamento, contrato, imovel, diasEmAtraso }) => {
+                    {linhasExibidas.map(({ pagamento, contrato, imovel, diasEmAtraso }) => {
                       const emAberto = Math.max(
                         Number(pagamento.saldo ?? 0),
                         0,
@@ -179,6 +190,12 @@ export default function AlugueisAtrasadosPage() {
                               </Link>
                             )}
                           </TableCell>
+                          <RegistrarPagamentoRow
+                            pagamento={pagamento}
+                            onRegistrado={(id) =>
+                              setIdsPagos((prev) => new Set(prev).add(id))
+                            }
+                          />
                         </TableRow>
                       );
                     })}

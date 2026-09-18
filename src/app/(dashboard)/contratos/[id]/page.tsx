@@ -24,11 +24,23 @@ export default function ContratoDetalhePage() {
         }
         description="Detalhes e edição do contrato de locação"
         actions={
-          <Button asChild variant="outline">
-            <Link href="/contratos">
-              <ArrowLeft className="size-4" /> Voltar
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline">
+              <Link href={`/pagamentos-contrato?contratoId=${params.id}&atraso=1`}>
+                Aluguéis em atraso
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={`/pagamentos-contrato?contratoId=${params.id}`}>
+                Todos aluguéis
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/contratos">
+                <ArrowLeft className="size-4" /> Voltar
+              </Link>
+            </Button>
+          </div>
         }
       />
       {isLoading ? (

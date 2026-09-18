@@ -1,5 +1,6 @@
 import type { BadgeProps } from "@/components/ui/badge";
 import type {
+  FormaPagamento,
   IndiceReajuste,
   ProvedorAutenticacao,
   StatusContrato,
@@ -107,4 +108,14 @@ export const statusUsuarioLabels: Record<StatusUsuario, string> = {
 export const statusUsuarioVariant: Record<StatusUsuario, BadgeVariant> = {
   ATIVO: "success",
   INATIVO: "secondary",
+};
+
+export const formaPagamentoLabels: Record<FormaPagamento, string> = {
+  PIX: "Pix",
+  TRANSFERENCIA: "Transferência",
+  BOLETO: "Boleto",
+  DINHEIRO: "Dinheiro",
+  CARTAO: "Cartão",
+  CHEQUE: "Cheque",
+  OUTRA: "Outra",
 };
