@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Plus } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import {
@@ -25,8 +25,9 @@ import {
 import { useContrato } from "@/hooks/use-contratos";
 import { usePagamentosAluguel } from "@/hooks/use-pagamentos-aluguel";
 import { RegistrarPagamentoRow } from "@/components/dashboard/registrar-pagamento-row";
+import { ExcluirPagamentoRow } from "@/components/dashboard/excluir-pagamento-row";
 import { listarPagamentosDoContrato } from "@/lib/dashboard";
-import { formatCurrency, formatDate, formatMonthLabel } from "@/lib/format";
+import { formatCompetencia, formatCurrency, formatDate } from "@/lib/format";
 import { formaPagamentoLabels } from "@/lib/labels";
 
 function PagamentosContratoContent() {
@@ -40,7 +41,7 @@ function PagamentosContratoContent() {
   const isLoading = contratoQuery.isLoading || pagamentosQuery.isLoading;
   const error = contratoQuery.error ?? pagamentosQuery.error;
 
-  const linhas = React.useMemo(() => {
+  const todasAsLinhas = React.useMemo(() => {
     if (!contratoQuery.data) return [];
     const todas = listarPagamentosDoContrato(
       pagamentosQuery.data ?? [],
@@ -50,6 +51,15 @@ function PagamentosContratoContent() {
       ? todas.filter((l) => l.pagamento.statusEfetivo === "EM_ATRASO")
       : todas;
   }, [contratoQuery.data, pagamentosQuery.data, somenteAtraso]);
+
+  // Some da lista assim que excluído, sem esperar o refetch.
+  const [idsExcluidos, setIdsExcluidos] = React.useState<Set<string>>(
+    new Set(),
+  );
+  const linhas = React.useMemo(
+    () => todasAsLinhas.filter((l) => !idsExcluidos.has(l.pagamento.id)),
+    [todasAsLinhas, idsExcluidos],
+  );
 
   const titulo = somenteAtraso ? "Aluguéis em atraso" : "Todos os aluguéis";
   const contrato = contratoQuery.data;
@@ -76,11 +86,20 @@ function PagamentosContratoContent() {
             : "Aluguéis do contrato"
         }
         actions={
-          <Button asChild variant="outline">
-            <Link href={`/contratos/${contratoId}`}>
-              <ArrowLeft className="size-4" /> Voltar ao contrato
-            </Link>
-          </Button>
+          <>
+            {!somenteAtraso && (
+              <Button asChild>
+                <Link href={`/pagamentos-contrato/novo?contratoId=${contratoId}`}>
+                  <Plus className="size-4" /> Incluir aluguel
+                </Link>
+              </Button>
+            )}
+            <Button asChild variant="outline">
+              <Link href={`/contratos/${contratoId}`}>
+                <ArrowLeft className="size-4" /> Voltar ao contrato
+              </Link>
+            </Button>
+          </>
         }
       />
 
@@ -127,6 +146,7 @@ function PagamentosContratoContent() {
                       </>
                     )}
                     <TableHead className="w-10" />
+                    <TableHead className="w-10" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -135,7 +155,7 @@ function PagamentosContratoContent() {
                     return (
                       <TableRow key={pagamento.id}>
                         <TableCell>
-                          {formatMonthLabel(pagamento.competencia)}
+                          {formatCompetencia(pagamento.competencia)}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {formatDate(pagamento.dataVencimento)}
@@ -196,6 +216,12 @@ function PagamentosContratoContent() {
                             )}
                           </TableCell>
                         )}
+                        <ExcluirPagamentoRow
+                          pagamento={pagamento}
+                          onExcluido={(id) =>
+                            setIdsExcluidos((prev) => new Set(prev).add(id))
+                          }
+                        />
                       </TableRow>
                     );
                   })}

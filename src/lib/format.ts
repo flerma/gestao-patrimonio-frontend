@@ -46,6 +46,16 @@ export function formatMonthLabel(monthKey: string): string {
     .replace(".", "");
 }
 
+/** Formata "yyyy-MM" como "Setembro/26" (usado nas listas de aluguéis). */
+export function formatCompetencia(monthKey: string): string {
+  const [year, month] = monthKey.split("-").map(Number);
+  const date = new Date(year, (month ?? 1) - 1, 1);
+  const mes = date.toLocaleDateString("pt-BR", { month: "long" });
+  const mesCapitalizado = mes.charAt(0).toUpperCase() + mes.slice(1);
+  const anoCurto = String(year).slice(-2);
+  return `${mesCapitalizado}/${anoCurto}`;
+}
+
 /** Converte SNAKE_CASE / UPPER para "Snake case" legível. */
 export function humanizeEnum(value: string | null | undefined): string {
   if (!value) return "—";

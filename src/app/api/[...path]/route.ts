@@ -37,6 +37,11 @@ const HOP_BY_HOP_RESPONSE_HEADERS = new Set([
   "connection",
 ]);
 
+// Respostas com esses status não podem ter corpo (spec do Fetch): passar
+// qualquer body para o construtor de Response/NextResponse, mesmo vazio,
+// lança TypeError ("Response with null body status cannot have body").
+const NULL_BODY_STATUSES = new Set([101, 103, 204, 205, 304]);
+
 function buildForwardHeaders(request: NextRequest, accessToken?: string) {
   const headers = new Headers();
   request.headers.forEach((value, key) => {
@@ -93,7 +98,9 @@ async function handler(
     }
   }
 
-  const responseBody = await backendResponse.arrayBuffer();
+  const responseBody = NULL_BODY_STATUSES.has(backendResponse.status)
+    ? null
+    : await backendResponse.arrayBuffer();
   return new NextResponse(responseBody, {
     status: backendResponse.status,
     headers: buildResponseHeaders(backendResponse.headers),

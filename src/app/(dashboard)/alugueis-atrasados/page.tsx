@@ -26,8 +26,9 @@ import { useImoveis } from "@/hooks/use-imoveis";
 import { useContratos } from "@/hooks/use-contratos";
 import { usePagamentosAluguel } from "@/hooks/use-pagamentos-aluguel";
 import { RegistrarPagamentoRow } from "@/components/dashboard/registrar-pagamento-row";
+import { ExcluirPagamentoRow } from "@/components/dashboard/excluir-pagamento-row";
 import { filtrarPorUsuario, listarAlugueisEmAtraso } from "@/lib/dashboard";
-import { formatCurrency, formatDate, formatMonthLabel } from "@/lib/format";
+import { formatCompetencia, formatCurrency, formatDate } from "@/lib/format";
 import type { UUID } from "@/lib/types";
 
 export default function AlugueisAtrasadosPage() {
@@ -57,9 +58,13 @@ export default function AlugueisAtrasadosPage() {
   // Some da lista assim que marcado como pago, sem esperar o refetch (que
   // de qualquer forma o excluiria, já que deixa de estar em atraso).
   const [idsPagos, setIdsPagos] = React.useState<Set<UUID>>(new Set());
+  const [idsExcluidos, setIdsExcluidos] = React.useState<Set<UUID>>(new Set());
   const linhasExibidas = React.useMemo(
-    () => linhas.filter((l) => !idsPagos.has(l.pagamento.id)),
-    [linhas, idsPagos],
+    () =>
+      linhas.filter(
+        (l) => !idsPagos.has(l.pagamento.id) && !idsExcluidos.has(l.pagamento.id),
+      ),
+    [linhas, idsPagos, idsExcluidos],
   );
 
   const totalEmAberto = linhasExibidas.reduce(
@@ -125,15 +130,16 @@ export default function AlugueisAtrasadosPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Competência</TableHead>
                       <TableHead className="w-10">Pagar</TableHead>
                       <TableHead>Imóvel</TableHead>
                       <TableHead>Inquilino</TableHead>
-                      <TableHead>Competência</TableHead>
                       <TableHead>Vencimento</TableHead>
                       <TableHead>Atraso</TableHead>
                       <TableHead className="text-right">Previsto</TableHead>
                       <TableHead className="text-right">Recebido</TableHead>
                       <TableHead className="text-right">Em aberto</TableHead>
+                      <TableHead className="w-10" />
                       <TableHead className="w-10" />
                     </TableRow>
                   </TableHeader>
@@ -145,6 +151,9 @@ export default function AlugueisAtrasadosPage() {
                       );
                       return (
                         <TableRow key={pagamento.id}>
+                          <TableCell>
+                            {formatCompetencia(pagamento.competencia)}
+                          </TableCell>
                           <RegistrarPagamentoRow
                             pagamento={pagamento}
                             onRegistrado={(id) =>
@@ -165,9 +174,6 @@ export default function AlugueisAtrasadosPage() {
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {contrato?.inquilino?.nome ?? "—"}
-                          </TableCell>
-                          <TableCell>
-                            {formatMonthLabel(pagamento.competencia)}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {formatDate(pagamento.dataVencimento)}
@@ -196,6 +202,12 @@ export default function AlugueisAtrasadosPage() {
                               </Link>
                             )}
                           </TableCell>
+                          <ExcluirPagamentoRow
+                            pagamento={pagamento}
+                            onExcluido={(id) =>
+                              setIdsExcluidos((prev) => new Set(prev).add(id))
+                            }
+                          />
                         </TableRow>
                       );
                     })}
