@@ -3,6 +3,7 @@ import type {
   FormaPagamento,
   IndiceReajuste,
   ProvedorAutenticacao,
+  RoleUsuario,
   StatusContrato,
   StatusImovel,
   StatusInquilino,
@@ -108,6 +109,16 @@ export const statusUsuarioLabels: Record<StatusUsuario, string> = {
 export const statusUsuarioVariant: Record<StatusUsuario, BadgeVariant> = {
   ATIVO: "success",
   INATIVO: "secondary",
+};
+
+export const roleUsuarioLabels: Record<RoleUsuario, string> = {
+  ADMIN: "Administrador",
+  USUARIO: "Usuário",
+};
+
+export const roleUsuarioVariant: Record<RoleUsuario, BadgeVariant> = {
+  ADMIN: "warning",
+  USUARIO: "secondary",
 };
 
 export const formaPagamentoLabels: Record<FormaPagamento, string> = {

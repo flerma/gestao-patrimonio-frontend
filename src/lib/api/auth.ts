@@ -1,4 +1,5 @@
 import { apiFetch } from "./client";
+import type { RoleUsuario } from "@/lib/types";
 
 /**
  * Usuário autenticado, conforme devolvido pelos Route Handlers de auth
@@ -12,6 +13,7 @@ export interface AuthUsuario {
   provedorAutenticacao?: string;
   idUsuarioProvedor?: string | null;
   status?: string;
+  role: RoleUsuario;
   dataCriacao?: string;
   dataAtualizacao?: string;
 }

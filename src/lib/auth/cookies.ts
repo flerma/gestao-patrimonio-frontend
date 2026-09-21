@@ -5,7 +5,7 @@
 
 export const ACCESS_TOKEN_COOKIE = "gpi_access_token";
 export const REFRESH_TOKEN_COOKIE = "gpi_refresh_token";
-/** Cache não-sensível (não httpOnly) de `{id,nome,email}` para hidratar a UI. */
+/** Cache não-sensível (não httpOnly) de `{id,nome,email,role}` para hidratar a UI. */
 export const USER_COOKIE = "gpi_user";
 
 export const ACCESS_TOKEN_MAX_AGE = 3600; // 1 hora — mesmo valor do `expiresIn` do backend.

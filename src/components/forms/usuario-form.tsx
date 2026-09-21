@@ -7,12 +7,14 @@ import { z } from "zod";
 
 import {
   PROVEDOR_AUTENTICACAO,
+  ROLE_USUARIO,
   STATUS_USUARIO,
   type UsuarioRequest,
   type UsuarioResponse,
 } from "@/lib/types";
 import {
   provedorAutenticacaoLabels,
+  roleUsuarioLabels,
   statusUsuarioLabels,
 } from "@/lib/labels";
 import { useSalvarUsuario } from "@/hooks/use-usuarios";
@@ -32,6 +34,7 @@ const schema = z.object({
   provedorAutenticacao: z.enum(PROVEDOR_AUTENTICACAO),
   idUsuarioProvedor: z.string().optional(),
   status: z.enum(STATUS_USUARIO),
+  role: z.enum(ROLE_USUARIO, { required_error: "Selecione o perfil" }),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -44,6 +47,7 @@ function toDefaults(usuario?: UsuarioResponse): Partial<FormValues> {
     provedorAutenticacao: usuario?.provedorAutenticacao ?? "LOCAL",
     idUsuarioProvedor: usuario?.idUsuarioProvedor ?? "",
     status: usuario?.status ?? "ATIVO",
+    role: usuario?.role ?? "USUARIO",
   };
 }
 
@@ -64,6 +68,7 @@ export function UsuarioForm({ usuario }: { usuario?: UsuarioResponse }) {
       provedorAutenticacao: values.provedorAutenticacao,
       idUsuarioProvedor: values.idUsuarioProvedor || undefined,
       status: values.status,
+      role: values.role,
     };
     salvar.mutate(payload, { onSuccess: () => router.push("/usuarios") });
   };
@@ -99,6 +104,13 @@ export function UsuarioForm({ usuario }: { usuario?: UsuarioResponse }) {
               name="status"
               label="Status"
               options={enumOptions(STATUS_USUARIO, statusUsuarioLabels)}
+            />
+            <SelectField
+              control={form.control}
+              name="role"
+              label="Perfil"
+              placeholder="Selecione o perfil"
+              options={enumOptions(ROLE_USUARIO, roleUsuarioLabels)}
             />
             <TextField
               control={form.control}

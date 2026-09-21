@@ -27,6 +27,8 @@ import { useExcluirUsuario, useUsuarios } from "@/hooks/use-usuarios";
 import { formatDate } from "@/lib/format";
 import {
   provedorAutenticacaoLabels,
+  roleUsuarioLabels,
+  roleUsuarioVariant,
   statusUsuarioLabels,
   statusUsuarioVariant,
 } from "@/lib/labels";
@@ -101,6 +103,7 @@ export default function UsuariosPage() {
                   <TableHead>E-mail</TableHead>
                   <TableHead>Provedor</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Perfil</TableHead>
                   <TableHead>Cadastro</TableHead>
                   <TableHead className="w-10" />
                 </TableRow>
@@ -125,6 +128,11 @@ export default function UsuariosPage() {
                     <TableCell>
                       <Badge variant={statusUsuarioVariant[usuario.status]}>
                         {statusUsuarioLabels[usuario.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={roleUsuarioVariant[usuario.role]}>
+                        {roleUsuarioLabels[usuario.role]}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">

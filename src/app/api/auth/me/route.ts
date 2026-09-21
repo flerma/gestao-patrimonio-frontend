@@ -8,7 +8,7 @@ import { ACCESS_TOKEN_COOKIE, USER_COOKIE } from "@/lib/auth/cookies";
  * o JWT (payload não-assinado, só serviria para exibição) optamos pela
  * abordagem mais simples e robusta sugerida na spec: `login/route.ts` também
  * grava um cookie legível (não httpOnly) `gpi_user` com
- * `{id, nome, email}` a partir da resposta do login. Aqui só verificamos que a
+ * `{id, nome, email, role}` a partir da resposta do login. Aqui só verificamos que a
  * sessão ainda existe (cookie de access token presente) e devolvemos o cache.
  * Nunca é usado para decisões de autorização — o backend revalida o JWT em
  * toda chamada real via o proxy catch-all.

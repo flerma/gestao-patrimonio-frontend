@@ -16,7 +16,13 @@ interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
-  usuario: { id: string; nome: string; email: string; [key: string]: unknown };
+  usuario: {
+    id: string;
+    nome: string;
+    email: string;
+    role: string;
+    [key: string]: unknown;
+  };
 }
 
 export async function POST(request: Request) {
@@ -63,6 +69,7 @@ export async function POST(request: Request) {
       id: data.usuario.id,
       nome: data.usuario.nome,
       email: data.usuario.email,
+      role: data.usuario.role,
     }),
     { ...displayCookieOptions, maxAge: REFRESH_TOKEN_MAX_AGE },
   );

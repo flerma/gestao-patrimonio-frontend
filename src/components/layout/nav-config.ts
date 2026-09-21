@@ -12,6 +12,8 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   description: string;
+  /** Quando true, só aparece para usuários com role ADMIN. */
+  adminOnly?: boolean;
 }
 
 export const navItems: NavItem[] = [
@@ -44,5 +46,6 @@ export const navItems: NavItem[] = [
     href: "/usuarios",
     icon: Users,
     description: "Proprietários do patrimônio",
+    adminOnly: true,
   },
 ];

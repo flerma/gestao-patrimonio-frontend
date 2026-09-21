@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/providers";
 import {
   Tooltip,
   TooltipContent,
@@ -57,6 +58,10 @@ export function SidebarNav({
   collapsed?: boolean;
 }) {
   const pathname = usePathname();
+  const { usuario } = useAuth();
+  const itensVisiveis = navItems.filter(
+    (item) => !item.adminOnly || usuario?.role === "ADMIN",
+  );
 
   return (
     <TooltipProvider delayDuration={0} disableHoverableContent>
@@ -66,7 +71,7 @@ export function SidebarNav({
           collapsed ? "items-center px-2" : "px-3",
         )}
       >
-        {navItems.map((item) => {
+        {itensVisiveis.map((item) => {
           const active =
             item.href === "/"
               ? pathname === "/"
