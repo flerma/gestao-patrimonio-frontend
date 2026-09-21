@@ -48,7 +48,7 @@ export function AlertsPanel({ alertas }: { alertas: Alerta[] }) {
           </span>
         )}
       </CardHeader>
-      <CardContent className="flex-1 space-y-2.5 overflow-y-auto">
+      <CardContent className="max-h-40 flex-1 space-y-2.5 overflow-y-auto">
         {alertas.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             Nenhum alerta no momento. Está tudo em dia. 🎉

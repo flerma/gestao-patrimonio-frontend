@@ -211,51 +211,53 @@ export default function DashboardPage() {
                   Nenhum imóvel cadastrado para este proprietário.
                 </p>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Imóvel</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Localização</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Valor atual</TableHead>
-                      <TableHead className="text-right">Aluguel/mês</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {dados.imoveisUsuario.map((imovel) => (
-                      <TableRow key={imovel.id}>
-                        <TableCell className="font-medium">
-                          <Link
-                            href={`/imoveis/${imovel.id}`}
-                            className="hover:underline"
-                          >
-                            {imovel.nome}
-                          </Link>
-                        </TableCell>
-                        <TableCell>{tipoImovelLabels[imovel.tipo]}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {[imovel.endereco?.cidade, imovel.endereco?.estado]
-                            .filter(Boolean)
-                            .join(" / ") || "—"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={statusImovelVariant[imovel.status]}>
-                            {statusImovelLabels[imovel.status]}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(imovel.valorAtual)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {aluguelPorImovel.has(imovel.id)
-                            ? formatCurrency(aluguelPorImovel.get(imovel.id))
-                            : "—"}
-                        </TableCell>
+                <div className="max-h-[280px] overflow-y-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="sticky top-0 z-10 bg-card">Imóvel</TableHead>
+                        <TableHead className="sticky top-0 z-10 bg-card">Tipo</TableHead>
+                        <TableHead className="sticky top-0 z-10 bg-card">Localização</TableHead>
+                        <TableHead className="sticky top-0 z-10 bg-card">Status</TableHead>
+                        <TableHead className="sticky top-0 z-10 bg-card text-right">Valor atual</TableHead>
+                        <TableHead className="sticky top-0 z-10 bg-card text-right">Aluguel/mês</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {dados.imoveisUsuario.map((imovel) => (
+                        <TableRow key={imovel.id}>
+                          <TableCell className="font-medium">
+                            <Link
+                              href={`/imoveis/${imovel.id}`}
+                              className="hover:underline"
+                            >
+                              {imovel.nome}
+                            </Link>
+                          </TableCell>
+                          <TableCell>{tipoImovelLabels[imovel.tipo]}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {[imovel.endereco?.cidade, imovel.endereco?.estado]
+                              .filter(Boolean)
+                              .join(" / ") || "—"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={statusImovelVariant[imovel.status]}>
+                              {statusImovelLabels[imovel.status]}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(imovel.valorAtual)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {aluguelPorImovel.has(imovel.id)
+                              ? formatCurrency(aluguelPorImovel.get(imovel.id))
+                              : "—"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
             </CardContent>
           </Card>

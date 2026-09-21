@@ -120,8 +120,12 @@ function PagamentosContratoContent() {
                     <TableHead className="text-right">Previsto</TableHead>
                     <TableHead className="text-right">Recebido</TableHead>
                     <TableHead className="text-right">Em aberto</TableHead>
-                    <TableHead>Data pagamento</TableHead>
-                    <TableHead>Forma</TableHead>
+                    {!somenteAtraso && (
+                      <>
+                        <TableHead>Data pagamento</TableHead>
+                        <TableHead>Forma</TableHead>
+                      </>
+                    )}
                     <TableHead className="w-10" />
                   </TableRow>
                 </TableHeader>
@@ -152,19 +156,29 @@ function PagamentosContratoContent() {
                         <TableCell className="text-right tabular-nums text-muted-foreground">
                           {formatCurrency(pagamento.valorPago)}
                         </TableCell>
-                        <TableCell className="text-right font-medium tabular-nums text-destructive">
+                        <TableCell
+                          className={`text-right font-medium tabular-nums ${
+                            pagamento.statusEfetivo === "EM_ATRASO"
+                              ? "text-destructive"
+                              : ""
+                          }`}
+                        >
                           {formatCurrency(emAberto)}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {pagamento.dataPagamento
-                            ? formatDate(pagamento.dataPagamento)
-                            : "—"}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {pagamento.formaPagamento
-                            ? formaPagamentoLabels[pagamento.formaPagamento]
-                            : "—"}
-                        </TableCell>
+                        {!somenteAtraso && (
+                          <>
+                            <TableCell className="text-muted-foreground">
+                              {pagamento.dataPagamento
+                                ? formatDate(pagamento.dataPagamento)
+                                : "—"}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {pagamento.formaPagamento
+                                ? formaPagamentoLabels[pagamento.formaPagamento]
+                                : "—"}
+                            </TableCell>
+                          </>
+                        )}
                         {pagamento.statusEfetivo === "EM_ATRASO" ? (
                           <RegistrarPagamentoRow
                             pagamento={pagamento}

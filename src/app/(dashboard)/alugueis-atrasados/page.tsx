@@ -125,6 +125,7 @@ export default function AlugueisAtrasadosPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-10">Pagar</TableHead>
                       <TableHead>Imóvel</TableHead>
                       <TableHead>Inquilino</TableHead>
                       <TableHead>Competência</TableHead>
@@ -133,7 +134,6 @@ export default function AlugueisAtrasadosPage() {
                       <TableHead className="text-right">Previsto</TableHead>
                       <TableHead className="text-right">Recebido</TableHead>
                       <TableHead className="text-right">Em aberto</TableHead>
-                      <TableHead className="w-10" />
                       <TableHead className="w-10" />
                     </TableRow>
                   </TableHeader>
@@ -145,6 +145,12 @@ export default function AlugueisAtrasadosPage() {
                       );
                       return (
                         <TableRow key={pagamento.id}>
+                          <RegistrarPagamentoRow
+                            pagamento={pagamento}
+                            onRegistrado={(id) =>
+                              setIdsPagos((prev) => new Set(prev).add(id))
+                            }
+                          />
                           <TableCell className="font-medium">
                             {imovel ? (
                               <Link
@@ -190,12 +196,6 @@ export default function AlugueisAtrasadosPage() {
                               </Link>
                             )}
                           </TableCell>
-                          <RegistrarPagamentoRow
-                            pagamento={pagamento}
-                            onRegistrado={(id) =>
-                              setIdsPagos((prev) => new Set(prev).add(id))
-                            }
-                          />
                         </TableRow>
                       );
                     })}
