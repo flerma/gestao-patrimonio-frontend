@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle2 } from "lucide-react";
+import { Banknote } from "lucide-react";
 import { toast } from "sonner";
 
 import { TableCell } from "@/components/ui/table";
@@ -81,7 +81,7 @@ export function RegistrarPagamentoRow({
           title="Marcar como pago"
           aria-label="Marcar como pago"
         >
-          <CheckCircle2 className="size-5 text-emerald-600" />
+          <Banknote className="size-5 text-emerald-600" />
         </Button>
         <DialogContent>
           <DialogHeader>

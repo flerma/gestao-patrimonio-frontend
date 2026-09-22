@@ -133,6 +133,8 @@ function PagamentosContratoContent() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10" />
+                    <TableHead className="w-10" />
                     <TableHead>Competência</TableHead>
                     <TableHead>Vencimento</TableHead>
                     <TableHead>Atraso</TableHead>
@@ -145,8 +147,6 @@ function PagamentosContratoContent() {
                         <TableHead>Forma</TableHead>
                       </>
                     )}
-                    <TableHead className="w-10" />
-                    <TableHead className="w-10" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -154,6 +154,29 @@ function PagamentosContratoContent() {
                     const emAberto = Math.max(Number(pagamento.saldo ?? 0), 0);
                     return (
                       <TableRow key={pagamento.id}>
+                        {pagamento.statusEfetivo === "EM_ATRASO" ? (
+                          <RegistrarPagamentoRow
+                            pagamento={pagamento}
+                            onRegistrado={() => {}}
+                          />
+                        ) : (
+                          <TableCell>
+                            {pagamento.status === "PAGO" ? (
+                              <CheckCircle2
+                                className="size-5 text-emerald-600"
+                                aria-label="Pago"
+                              />
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                        )}
+                        <ExcluirPagamentoRow
+                          pagamento={pagamento}
+                          onExcluido={(id) =>
+                            setIdsExcluidos((prev) => new Set(prev).add(id))
+                          }
+                        />
                         <TableCell>
                           {formatCompetencia(pagamento.competencia)}
                         </TableCell>
@@ -199,29 +222,6 @@ function PagamentosContratoContent() {
                             </TableCell>
                           </>
                         )}
-                        {pagamento.statusEfetivo === "EM_ATRASO" ? (
-                          <RegistrarPagamentoRow
-                            pagamento={pagamento}
-                            onRegistrado={() => {}}
-                          />
-                        ) : (
-                          <TableCell>
-                            {pagamento.status === "PAGO" ? (
-                              <CheckCircle2
-                                className="size-5 text-emerald-600"
-                                aria-label="Pago"
-                              />
-                            ) : (
-                              <span className="text-muted-foreground">—</span>
-                            )}
-                          </TableCell>
-                        )}
-                        <ExcluirPagamentoRow
-                          pagamento={pagamento}
-                          onExcluido={(id) =>
-                            setIdsExcluidos((prev) => new Set(prev).add(id))
-                          }
-                        />
                       </TableRow>
                     );
                   })}
