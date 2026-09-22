@@ -28,6 +28,14 @@ const HOP_BY_HOP_REQUEST_HEADERS = new Set([
   "connection",
   "cookie",
   "content-length",
+  // O navegador inclui `Origin` em requisições com métodos "unsafe" (POST,
+  // PUT, DELETE, PATCH) mesmo quando same-origin (para a própria Vercel).
+  // Repassar isso ao backend faz o CorsFilter do Spring tratar a chamada
+  // como cross-origin e rejeitá-la com 403 quando o domínio do frontend não
+  // está em `app.cors.allowed-origins` — mas essa é uma chamada
+  // server-to-server (proxy), não um request de navegador, então o header
+  // nunca deveria ser repassado.
+  "origin",
 ]);
 
 const HOP_BY_HOP_RESPONSE_HEADERS = new Set([
