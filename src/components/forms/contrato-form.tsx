@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,6 +27,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   NumberSelectField,
   SelectField,
   TextAreaField,
@@ -39,6 +48,19 @@ const DIAS_VENCIMENTO = Array.from({ length: 31 }, (_, i) => ({
   value: i + 1,
   label: String(i + 1),
 }));
+
+/** yyyy-MM-dd está em um mês anterior ao mês corrente. */
+function competenciaAnteriorAoMesAtual(dataInicio: string): boolean {
+  const match = dataInicio.match(/^(\d{4})-(\d{2})/);
+  if (!match) return false;
+  const [, anoStr, mesStr] = match;
+  const ano = Number(anoStr);
+  const mes = Number(mesStr);
+  const agora = new Date();
+  const anoAtual = agora.getFullYear();
+  const mesAtual = agora.getMonth() + 1;
+  return ano < anoAtual || (ano === anoAtual && mes < mesAtual);
+}
 
 const schema = z
   .object({
@@ -104,6 +126,12 @@ export function ContratoForm({
     defaultValues: toDefaults(contrato) as FormValues,
   });
 
+  const [payloadPendente, setPayloadPendente] = React.useState<ContratoRequest | null>(null);
+
+  const enviar = (payload: ContratoRequest) => {
+    salvar.mutate(payload, { onSuccess: () => router.push("/contratos") });
+  };
+
   const onSubmit = (values: FormValues) => {
     const payload: ContratoRequest = {
       imovelId: values.imovelId,
@@ -121,7 +149,20 @@ export function ContratoForm({
       valorGarantia: values.valorGarantia,
       observacoes: values.observacoes || undefined,
     };
-    salvar.mutate(payload, { onSuccess: () => router.push("/contratos") });
+    if (competenciaAnteriorAoMesAtual(values.dataInicio)) {
+      setPayloadPendente(payload);
+      return;
+    }
+    enviar(payload);
+  };
+
+  const confirmarParcelasAnteriores = (marcarComoPagas: boolean) => {
+    if (!payloadPendente) return;
+    enviar({
+      ...payloadPendente,
+      marcarParcelasAnterioresComoPagas: marcarComoPagas,
+    });
+    setPayloadPendente(null);
   };
 
   return (
@@ -242,6 +283,34 @@ export function ContratoForm({
           </Button>
         </div>
       </form>
+
+      <Dialog
+        open={payloadPendente !== null}
+        onOpenChange={(open) => !open && setPayloadPendente(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Parcelas anteriores ao mês atual</DialogTitle>
+            <DialogDescription>
+              A data de início de vigência gera aluguéis com competência
+              anterior ao mês atual. Deseja que essas parcelas sejam
+              criadas já como pagas (via Pix, na data de vencimento de cada
+              uma) ou como pendentes e em atraso?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => confirmarParcelasAnteriores(false)}
+            >
+              Criar como pendentes
+            </Button>
+            <Button onClick={() => confirmarParcelasAnteriores(true)}>
+              Criar como pagas
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Form>
   );
 }
