@@ -2,23 +2,26 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { ErrorState, LoadingState } from "@/components/query-state";
 import { ContratoForm } from "@/components/forms/contrato-form";
+import { DeleteIconButton } from "@/components/delete-icon-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useContrato } from "@/hooks/use-contratos";
+import { useContrato, useExcluirContrato } from "@/hooks/use-contratos";
 import { usePagamentosAluguel } from "@/hooks/use-pagamentos-aluguel";
 import { calcularResumoPagamentos } from "@/lib/dashboard";
 import { formatCurrency } from "@/lib/format";
 
 export default function ContratoDetalhePage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const { data, isLoading, error, refetch } = useContrato(params.id);
   const pagamentosQuery = usePagamentosAluguel(params.id);
+  const excluir = useExcluirContrato();
 
   const resumo = React.useMemo(
     () => calcularResumoPagamentos(pagamentosQuery.data ?? []),
@@ -46,6 +49,17 @@ export default function ContratoDetalhePage() {
                 Todos aluguéis
               </Link>
             </Button>
+            {data && (
+              <DeleteIconButton
+                itemLabel={`contrato de ${data.imovel?.nome ?? "imóvel"}`}
+                deleting={excluir.isPending}
+                onDelete={() =>
+                  excluir.mutate(data.id, {
+                    onSuccess: () => router.push("/contratos"),
+                  })
+                }
+              />
+            )}
             <Button asChild variant="outline">
               <Link href="/contratos">
                 <ArrowLeft className="size-4" /> Voltar

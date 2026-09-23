@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { ErrorState, LoadingState } from "@/components/query-state";
 import { ImovelForm } from "@/components/forms/imovel-form";
+import { DeleteIconButton } from "@/components/delete-icon-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useImovel } from "@/hooks/use-imoveis";
+import { useExcluirImovel, useImovel } from "@/hooks/use-imoveis";
 import { useContratos } from "@/hooks/use-contratos";
 import { formatCurrency, formatDate } from "@/lib/format";
 import {
@@ -25,12 +26,15 @@ import {
   statusImovelLabels,
   statusImovelVariant,
 } from "@/lib/labels";
+import { MSG_IMOVEL_COM_CONTRATO } from "@/lib/vinculos";
 
 export default function ImovelDetalhePage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const id = params.id;
   const { data: imovel, isLoading, error, refetch } = useImovel(id);
-  const { data: contratos } = useContratos();
+  const { data: contratos, isLoading: contratosLoading } = useContratos();
+  const excluir = useExcluirImovel();
 
   const contratosDoImovel = (contratos ?? []).filter(
     (c) => c.imovel?.id === id,
@@ -42,11 +46,31 @@ export default function ImovelDetalhePage() {
         title={imovel?.nome ?? "Imóvel"}
         description="Detalhes e edição do imóvel"
         actions={
-          <Button asChild variant="outline">
-            <Link href="/imoveis">
-              <ArrowLeft className="size-4" /> Voltar
-            </Link>
-          </Button>
+          <>
+            {imovel && (
+              <DeleteIconButton
+                itemLabel={imovel.nome}
+                deleting={excluir.isPending}
+                blockedReason={
+                  contratosLoading
+                    ? "Aguarde o carregamento dos contratos…"
+                    : contratosDoImovel.length > 0
+                      ? MSG_IMOVEL_COM_CONTRATO
+                      : null
+                }
+                onDelete={() =>
+                  excluir.mutate(id, {
+                    onSuccess: () => router.push("/imoveis"),
+                  })
+                }
+              />
+            )}
+            <Button asChild variant="outline">
+              <Link href="/imoveis">
+                <ArrowLeft className="size-4" /> Voltar
+              </Link>
+            </Button>
+          </>
         }
       />
 
