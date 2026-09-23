@@ -21,6 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { CepField } from "@/components/forms/cep-field";
 import { CidadeField } from "@/components/forms/cidade-field";
+import { MoneyField } from "@/components/forms/money-field";
 import {
   SelectField,
   TextField,
@@ -139,17 +140,15 @@ export function ImovelForm({ imovel }: { imovel?: ImovelResponse }) {
               label="Status"
               options={enumOptions(STATUS_IMOVEL, statusImovelLabels)}
             />
-            <TextField
+            <MoneyField
               control={form.control}
               name="valorAquisicao"
               label="Valor de aquisição (R$)"
-              type="number"
             />
-            <TextField
+            <MoneyField
               control={form.control}
               name="valorAtual"
               label="Valor atual (R$)"
-              type="number"
             />
           </CardContent>
         </Card>

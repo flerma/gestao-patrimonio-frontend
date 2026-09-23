@@ -20,6 +20,7 @@ import {
   TextField,
   enumOptions,
 } from "@/components/forms/form-fields";
+import { MoneyField } from "@/components/forms/money-field";
 
 const PAGO_OPCOES = [
   { value: "NAO", label: "Não" },
@@ -103,11 +104,10 @@ export function PagamentoAluguelForm({ contratoId }: { contratoId: UUID }) {
               label="Data de vencimento"
               type="date"
             />
-            <TextField
+            <MoneyField
               control={form.control}
               name="valorPrevisto"
               label="Valor previsto (R$)"
-              type="number"
             />
             <SelectField
               control={form.control}

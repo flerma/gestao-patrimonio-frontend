@@ -26,11 +26,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import {
+  NumberSelectField,
   SelectField,
   TextAreaField,
   TextField,
   enumOptions,
 } from "@/components/forms/form-fields";
+import { MoneyField } from "@/components/forms/money-field";
+
+const DIAS_VENCIMENTO = Array.from({ length: 31 }, (_, i) => ({
+  value: i + 1,
+  label: String(i + 1),
+}));
 
 const schema = z
   .object({
@@ -165,17 +172,16 @@ export function ContratoForm({
               label="Fim da vigência (opcional)"
               type="date"
             />
-            <TextField
+            <MoneyField
               control={form.control}
               name="valorAluguel"
               label="Valor do aluguel (R$)"
-              type="number"
             />
-            <TextField
+            <NumberSelectField
               control={form.control}
               name="diaVencimento"
               label="Dia de vencimento"
-              type="number"
+              options={DIAS_VENCIMENTO}
             />
           </CardContent>
         </Card>
@@ -206,11 +212,10 @@ export function ContratoForm({
               label="Tipo de garantia"
               options={enumOptions(TIPO_GARANTIA, tipoGarantiaLabels)}
             />
-            <TextField
+            <MoneyField
               control={form.control}
               name="valorGarantia"
               label="Valor da garantia (R$)"
-              type="number"
             />
           </CardContent>
         </Card>

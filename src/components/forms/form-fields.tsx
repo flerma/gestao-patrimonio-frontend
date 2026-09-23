@@ -159,6 +159,57 @@ export function SelectField<T extends FieldValues>({
   );
 }
 
+export interface NumberOption {
+  value: number;
+  label: string;
+}
+
+/** Como SelectField, mas o valor do campo é um número (ex.: dia do mês). */
+export function NumberSelectField<T extends FieldValues>({
+  control,
+  name,
+  label,
+  description,
+  placeholder = "Selecione",
+  options,
+  className,
+}: BaseProps<T> & { options: NumberOption[] }) {
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className={className}>
+          <FormLabel>{label}</FormLabel>
+          <Select
+            value={
+              field.value === undefined || field.value === null
+                ? ""
+                : String(field.value)
+            }
+            onValueChange={(value) => field.onChange(Number(value))}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option.value} value={String(option.value)}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {description && <FormDescription>{description}</FormDescription>}
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
 export function enumOptions<T extends string>(
   values: readonly T[],
   labels: Record<T, string>,
