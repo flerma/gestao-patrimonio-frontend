@@ -1,7 +1,8 @@
 "use client";
 
+import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
@@ -13,6 +14,8 @@ import {
   type InquilinoResponse,
 } from "@/lib/types";
 import { statusInquilinoLabels, tipoPessoaLabels } from "@/lib/labels";
+import { isValidCnpj, isValidCpf } from "@/lib/documento";
+import { ufOptions } from "@/lib/uf";
 import { useSalvarInquilino } from "@/hooks/use-inquilinos";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +26,8 @@ import {
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { CepField } from "@/components/forms/cep-field";
+import { CidadeField } from "@/components/forms/cidade-field";
+import { DocumentoField } from "@/components/forms/documento-field";
 import {
   SelectField,
   TextAreaField,
@@ -30,31 +35,48 @@ import {
   enumOptions,
 } from "@/components/forms/form-fields";
 
-const schema = z.object({
-  tipoPessoa: z.enum(TIPO_PESSOA),
-  nome: z.string().trim().min(1, "Informe o nome"),
-  documento: z.string().trim().min(1, "Informe o CPF/CNPJ"),
-  email: z
-    .string()
-    .trim()
-    .email("E-mail inválido")
-    .optional()
-    .or(z.literal("")),
-  telefone: z.string().optional(),
-  dataNascimento: z.string().optional(),
-  status: z.enum(STATUS_INQUILINO),
-  endereco: z.object({
-    cep: z.string().optional(),
-    logradouro: z.string().optional(),
-    numero: z.string().optional(),
-    complemento: z.string().optional(),
-    bairro: z.string().optional(),
-    cidade: z.string().optional(),
-    estado: z.string().max(2, "Use a sigla (ex.: SP)").optional(),
-    pais: z.string().optional(),
-  }),
-  observacoes: z.string().max(1000).optional(),
-});
+const schema = z
+  .object({
+    tipoPessoa: z.enum(TIPO_PESSOA),
+    nome: z.string().trim().min(1, "Informe o nome"),
+    documento: z.string().trim().min(1, "Informe o CPF/CNPJ"),
+    email: z
+      .string()
+      .trim()
+      .email("E-mail inválido")
+      .optional()
+      .or(z.literal("")),
+    telefone: z.string().optional(),
+    dataNascimento: z.string().optional(),
+    status: z.enum(STATUS_INQUILINO),
+    endereco: z.object({
+      cep: z.string().optional(),
+      logradouro: z.string().optional(),
+      numero: z.string().optional(),
+      complemento: z.string().optional(),
+      bairro: z.string().optional(),
+      cidade: z.string().optional(),
+      estado: z.string().max(2, "Use a sigla (ex.: SP)").optional(),
+      pais: z.string().optional(),
+    }),
+    observacoes: z.string().max(1000).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.tipoPessoa === "FISICA" && !isValidCpf(data.documento)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["documento"],
+        message: "CPF inválido",
+      });
+    }
+    if (data.tipoPessoa === "JURIDICA" && !isValidCnpj(data.documento)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["documento"],
+        message: "CNPJ inválido",
+      });
+    }
+  });
 
 type FormValues = z.infer<typeof schema>;
 
@@ -94,6 +116,17 @@ export function InquilinoForm({
     defaultValues: toDefaults(inquilino) as FormValues,
   });
 
+  const tipoPessoa = useWatch({ control: form.control, name: "tipoPessoa" });
+  const tipoPessoaAnteriorRef = React.useRef(tipoPessoa);
+  React.useEffect(() => {
+    if (tipoPessoaAnteriorRef.current !== tipoPessoa) {
+      form.setValue("documento", "");
+      tipoPessoaAnteriorRef.current = tipoPessoa;
+    }
+  }, [tipoPessoa, form]);
+
+  const estado = useWatch({ control: form.control, name: "endereco.estado" });
+
   const preencherEndereco = (endereco: Endereco) => {
     form.setValue("endereco.logradouro", endereco.logradouro ?? "", {
       shouldDirty: true,
@@ -101,12 +134,14 @@ export function InquilinoForm({
     form.setValue("endereco.bairro", endereco.bairro ?? "", {
       shouldDirty: true,
     });
-    form.setValue("endereco.cidade", endereco.cidade ?? "", {
-      shouldDirty: true,
-    });
+    // Estado antes de cidade: o combo de cidade depende do estado para
+    // buscar a lista de municípios do IBGE.
     form.setValue("endereco.estado", endereco.estado ?? "", {
       shouldDirty: true,
       shouldValidate: true,
+    });
+    form.setValue("endereco.cidade", endereco.cidade ?? "", {
+      shouldDirty: true,
     });
     if (endereco.pais) {
       form.setValue("endereco.pais", endereco.pais, { shouldDirty: true });
@@ -160,10 +195,10 @@ export function InquilinoForm({
               name="nome"
               label="Nome / Razão social"
             />
-            <TextField
+            <DocumentoField
               control={form.control}
               name="documento"
-              label="CPF / CNPJ"
+              pessoaFisica={tipoPessoa === "FISICA"}
             />
             <TextField
               control={form.control}
@@ -217,16 +252,18 @@ export function InquilinoForm({
               name="endereco.bairro"
               label="Bairro"
             />
-            <TextField
-              control={form.control}
-              name="endereco.cidade"
-              label="Cidade"
-            />
-            <TextField
+            <SelectField
               control={form.control}
               name="endereco.estado"
               label="Estado (UF)"
-              placeholder="SP"
+              placeholder="Selecione"
+              options={ufOptions}
+              onValueChange={() => form.setValue("endereco.cidade", "")}
+            />
+            <CidadeField
+              control={form.control}
+              name="endereco.cidade"
+              uf={estado}
             />
             <TextField
               control={form.control}

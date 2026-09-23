@@ -118,7 +118,12 @@ export function SelectField<T extends FieldValues>({
   placeholder = "Selecione",
   options,
   className,
-}: BaseProps<T> & { options: Option[] }) {
+  onValueChange,
+}: BaseProps<T> & {
+  options: Option[];
+  /** Chamado apenas quando o usuário escolhe um valor (não em sets programáticos). */
+  onValueChange?: (value: string) => void;
+}) {
   return (
     <FormField
       control={control}
@@ -128,7 +133,10 @@ export function SelectField<T extends FieldValues>({
           <FormLabel>{label}</FormLabel>
           <Select
             value={field.value ?? ""}
-            onValueChange={field.onChange}
+            onValueChange={(value) => {
+              field.onChange(value);
+              onValueChange?.(value);
+            }}
           >
             <FormControl>
               <SelectTrigger>

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
@@ -14,11 +14,13 @@ import {
   type ImovelResponse,
 } from "@/lib/types";
 import { statusImovelLabels, tipoImovelLabels } from "@/lib/labels";
+import { ufOptions } from "@/lib/uf";
 import { useSalvarImovel } from "@/hooks/use-imoveis";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { CepField } from "@/components/forms/cep-field";
+import { CidadeField } from "@/components/forms/cidade-field";
 import {
   SelectField,
   TextField,
@@ -78,6 +80,8 @@ export function ImovelForm({ imovel }: { imovel?: ImovelResponse }) {
     defaultValues: toDefaults(imovel) as FormValues,
   });
 
+  const estado = useWatch({ control: form.control, name: "endereco.estado" });
+
   const preencherEndereco = (endereco: Endereco) => {
     form.setValue("endereco.logradouro", endereco.logradouro ?? "", {
       shouldDirty: true,
@@ -85,10 +89,12 @@ export function ImovelForm({ imovel }: { imovel?: ImovelResponse }) {
     form.setValue("endereco.bairro", endereco.bairro ?? "", {
       shouldDirty: true,
     });
-    form.setValue("endereco.cidade", endereco.cidade ?? "", {
+    // Estado antes de cidade: o combo de cidade depende do estado para
+    // buscar a lista de municípios do IBGE.
+    form.setValue("endereco.estado", endereco.estado ?? "", {
       shouldDirty: true,
     });
-    form.setValue("endereco.estado", endereco.estado ?? "", {
+    form.setValue("endereco.cidade", endereco.cidade ?? "", {
       shouldDirty: true,
     });
     if (endereco.pais) {
@@ -177,16 +183,18 @@ export function ImovelForm({ imovel }: { imovel?: ImovelResponse }) {
               name="endereco.bairro"
               label="Bairro"
             />
-            <TextField
-              control={form.control}
-              name="endereco.cidade"
-              label="Cidade"
-            />
-            <TextField
+            <SelectField
               control={form.control}
               name="endereco.estado"
               label="Estado (UF)"
-              placeholder="SP"
+              placeholder="Selecione"
+              options={ufOptions}
+              onValueChange={() => form.setValue("endereco.cidade", "")}
+            />
+            <CidadeField
+              control={form.control}
+              name="endereco.cidade"
+              uf={estado}
             />
             <TextField
               control={form.control}
