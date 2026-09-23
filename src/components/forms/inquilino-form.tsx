@@ -16,6 +16,7 @@ import {
 import { statusInquilinoLabels, tipoPessoaLabels } from "@/lib/labels";
 import { isValidCnpj, isValidCpf } from "@/lib/documento";
 import { ufOptions } from "@/lib/uf";
+import { ApiError } from "@/lib/api";
 import { useSalvarInquilino } from "@/hooks/use-inquilinos";
 import { Button } from "@/components/ui/button";
 import {
@@ -170,6 +171,16 @@ export function InquilinoForm({
     };
     salvar.mutate(payload, {
       onSuccess: () => router.push("/inquilinos"),
+      onError: (error) => {
+        if (error instanceof ApiError && error.body && typeof error.body === "object") {
+          const body = error.body as { campo?: string; message?: string };
+          if (body.campo === "documento") {
+            form.setError("documento", {
+              message: body.message ?? "CPF/CNPJ já cadastrado.",
+            });
+          }
+        }
+      },
     });
   };
 
