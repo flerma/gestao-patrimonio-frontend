@@ -33,6 +33,7 @@ import {
   enumOptions,
 } from "@/components/forms/form-fields";
 import { MoneyField } from "@/components/forms/money-field";
+import { DateField } from "@/components/forms/date-field";
 
 const DIAS_VENCIMENTO = Array.from({ length: 31 }, (_, i) => ({
   value: i + 1,
@@ -160,17 +161,15 @@ export function ContratoForm({
               label="Status"
               options={enumOptions(STATUS_CONTRATO, statusContratoLabels)}
             />
-            <TextField
+            <DateField
               control={form.control}
               name="dataInicio"
               label="Início da vigência"
-              type="date"
             />
-            <TextField
+            <DateField
               control={form.control}
               name="dataFim"
               label="Fim da vigência (opcional)"
-              type="date"
             />
             <MoneyField
               control={form.control}
