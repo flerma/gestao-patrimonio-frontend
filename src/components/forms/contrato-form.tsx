@@ -126,7 +126,12 @@ export function ContratoForm({
     defaultValues: toDefaults(contrato) as FormValues,
   });
 
-  const [payloadPendente, setPayloadPendente] = React.useState<ContratoRequest | null>(null);
+  type EtapaConfirmacao = "parcelas-anteriores" | "vencimento-futuro";
+  const [confirmacao, setConfirmacao] = React.useState<{
+    payload: ContratoRequest;
+    etapa: EtapaConfirmacao;
+    precisaVencimentoFuturo: boolean;
+  } | null>(null);
 
   const enviar = (payload: ContratoRequest) => {
     salvar.mutate(payload, { onSuccess: () => router.push("/contratos") });
@@ -149,20 +154,47 @@ export function ContratoForm({
       valorGarantia: values.valorGarantia,
       observacoes: values.observacoes || undefined,
     };
-    if (competenciaAnteriorAoMesAtual(values.dataInicio)) {
-      setPayloadPendente(payload);
+
+    const precisaParcelasAnteriores = competenciaAnteriorAoMesAtual(values.dataInicio);
+    const precisaVencimentoFuturo =
+      contrato !== undefined && contrato.diaVencimento !== values.diaVencimento;
+
+    if (precisaParcelasAnteriores) {
+      setConfirmacao({ payload, etapa: "parcelas-anteriores", precisaVencimentoFuturo });
+      return;
+    }
+    if (precisaVencimentoFuturo) {
+      setConfirmacao({ payload, etapa: "vencimento-futuro", precisaVencimentoFuturo: false });
       return;
     }
     enviar(payload);
   };
 
   const confirmarParcelasAnteriores = (marcarComoPagas: boolean) => {
-    if (!payloadPendente) return;
-    enviar({
-      ...payloadPendente,
+    if (!confirmacao) return;
+    const payloadAtualizado: ContratoRequest = {
+      ...confirmacao.payload,
       marcarParcelasAnterioresComoPagas: marcarComoPagas,
+    };
+    if (confirmacao.precisaVencimentoFuturo) {
+      setConfirmacao({
+        payload: payloadAtualizado,
+        etapa: "vencimento-futuro",
+        precisaVencimentoFuturo: false,
+      });
+      return;
+    }
+    enviar(payloadAtualizado);
+    setConfirmacao(null);
+  };
+
+  const confirmarVencimentoFuturo = (atualizar: boolean) => {
+    if (!confirmacao) return;
+    enviar({
+      ...confirmacao.payload,
+      atualizarVencimentoParcelasFuturas: atualizar,
     });
-    setPayloadPendente(null);
+    setConfirmacao(null);
   };
 
   return (
@@ -285,8 +317,8 @@ export function ContratoForm({
       </form>
 
       <Dialog
-        open={payloadPendente !== null}
-        onOpenChange={(open) => !open && setPayloadPendente(null)}
+        open={confirmacao?.etapa === "parcelas-anteriores"}
+        onOpenChange={(open) => !open && setConfirmacao(null)}
       >
         <DialogContent>
           <DialogHeader>
@@ -307,6 +339,34 @@ export function ContratoForm({
             </Button>
             <Button onClick={() => confirmarParcelasAnteriores(true)}>
               Criar como pagas
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={confirmacao?.etapa === "vencimento-futuro"}
+        onOpenChange={(open) => !open && setConfirmacao(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Atualizar vencimento das parcelas futuras?</DialogTitle>
+            <DialogDescription>
+              O dia de vencimento foi alterado. As parcelas de aluguel com
+              competência posterior ao mês atual terão a data de vencimento
+              alterada para o novo dia selecionado. Deseja confirmar essa
+              alteração?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => confirmarVencimentoFuturo(false)}
+            >
+              Não alterar
+            </Button>
+            <Button onClick={() => confirmarVencimentoFuturo(true)}>
+              Confirmar alteração
             </Button>
           </DialogFooter>
         </DialogContent>
