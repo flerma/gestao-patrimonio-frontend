@@ -15,6 +15,7 @@ import {
 } from "@/lib/types";
 import { statusImovelLabels, tipoImovelLabels } from "@/lib/labels";
 import { ufOptions } from "@/lib/uf";
+import { hojeIso } from "@/lib/date";
 import { useSalvarImovel } from "@/hooks/use-imoveis";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import { Form } from "@/components/ui/form";
 import { CepField } from "@/components/forms/cep-field";
 import { CidadeField } from "@/components/forms/cidade-field";
 import { MoneyField } from "@/components/forms/money-field";
+import { DateField } from "@/components/forms/date-field";
 import {
   SelectField,
   TextField,
@@ -35,6 +37,10 @@ const schema = z.object({
   valorAquisicao: z
     .number({ invalid_type_error: "Informe o valor de aquisição" })
     .min(0, "Valor inválido"),
+  dataAquisicao: z
+    .string()
+    .min(1, "Informe a data de aquisição")
+    .refine((data) => data <= hojeIso(), "A data de aquisição não pode ser uma data futura"),
   valorAtual: z
     .number({ invalid_type_error: "Informe o valor atual" })
     .min(0, "Valor inválido"),
@@ -58,6 +64,7 @@ function toDefaults(imovel?: ImovelResponse): Partial<FormValues> {
     tipo: imovel?.tipo,
     status: imovel?.status ?? "DISPONIVEL",
     valorAquisicao: imovel?.valorAquisicao,
+    dataAquisicao: imovel?.dataAquisicao ?? "",
     valorAtual: imovel?.valorAtual,
     endereco: {
       cep: imovel?.endereco?.cep ?? "",
@@ -144,6 +151,12 @@ export function ImovelForm({ imovel }: { imovel?: ImovelResponse }) {
               control={form.control}
               name="valorAquisicao"
               label="Valor de aquisição (R$)"
+            />
+            <DateField
+              control={form.control}
+              name="dataAquisicao"
+              label="Data de aquisição"
+              maxDate={hojeIso()}
             />
             <MoneyField
               control={form.control}

@@ -30,10 +30,13 @@ export function Calendar({
   value,
   onSelect,
   className,
+  maxDate,
 }: {
   value?: string;
   onSelect: (iso: string) => void;
   className?: string;
+  /** Datas (yyyy-MM-dd) após esta ficam desabilitadas na grade. */
+  maxDate?: string;
 }) {
   const valorParseado = React.useMemo(() => {
     const match = value?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -73,6 +76,13 @@ export function Calendar({
   const irParaMesSeguinte = () =>
     setMesVisivel(({ ano, mes }) => (mes === 11 ? { ano: ano + 1, mes: 0 } : { ano, mes: mes + 1 }));
 
+  const proximoMes =
+    mesVisivel.mes === 11
+      ? { ano: mesVisivel.ano + 1, mes: 0 }
+      : { ano: mesVisivel.ano, mes: mesVisivel.mes + 1 };
+  const mesSeguinteDesabilitado =
+    !!maxDate && toIso(proximoMes.ano, proximoMes.mes, 1) > maxDate;
+
   return (
     <div className={cn("w-64 select-none", className)}>
       <div className="mb-2 flex items-center justify-between">
@@ -90,7 +100,8 @@ export function Calendar({
         <button
           type="button"
           onClick={irParaMesSeguinte}
-          className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          disabled={mesSeguinteDesabilitado}
+          className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-30"
           aria-label="Próximo mês"
         >
           <ChevronRight className="size-4" />
@@ -104,25 +115,27 @@ export function Calendar({
         ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
-        {celulas.map((celula, i) =>
-          celula === null ? (
-            <span key={`vazio-${i}`} />
-          ) : (
+        {celulas.map((celula, i) => {
+          if (celula === null) return <span key={`vazio-${i}`} />;
+          const desabilitado = !!maxDate && celula.iso > maxDate;
+          return (
             <button
               key={celula.iso}
               type="button"
               onClick={() => onSelect(celula.iso)}
+              disabled={desabilitado}
               className={cn(
                 "flex h-8 w-8 items-center justify-center rounded-md text-sm hover:bg-accent hover:text-accent-foreground",
                 celula.iso === value &&
                   "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
                 celula.iso === isoHoje && celula.iso !== value && "border border-primary/50",
+                desabilitado && "pointer-events-none text-muted-foreground/40 hover:bg-transparent",
               )}
             >
               {celula.dia}
             </button>
-          ),
-        )}
+          );
+        })}
       </div>
     </div>
   );

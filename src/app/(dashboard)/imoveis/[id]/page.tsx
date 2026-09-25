@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/card";
 import { useExcluirImovel, useImovel } from "@/hooks/use-imoveis";
 import { useContratos } from "@/hooks/use-contratos";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatDate, formatPercent } from "@/lib/format";
 import {
   statusContratoLabels,
   statusContratoVariant,
@@ -39,6 +39,11 @@ export default function ImovelDetalhePage() {
   const contratosDoImovel = (contratos ?? []).filter(
     (c) => c.imovel?.id === id,
   );
+
+  const percentualRetorno =
+    imovel && imovel.valorAquisicao > 0
+      ? (imovel.valorAtual - imovel.valorAquisicao) / imovel.valorAquisicao
+      : null;
 
   return (
     <>
@@ -94,23 +99,31 @@ export default function ImovelDetalhePage() {
             </Card>
             <Card>
               <CardContent className="p-5">
+                <p className="text-sm text-muted-foreground">
+                  Percentual de retorno
+                </p>
+                <p
+                  className={`mt-1 text-xl font-semibold ${
+                    percentualRetorno !== null && percentualRetorno < 0
+                      ? "text-destructive"
+                      : ""
+                  }`}
+                >
+                  {formatPercent(percentualRetorno)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Desde a aquisição
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
                 <p className="text-sm text-muted-foreground">Status</p>
                 <div className="mt-2">
                   <Badge variant={statusImovelVariant[imovel.status]}>
                     {statusImovelLabels[imovel.status]}
                   </Badge>
                 </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5">
-                <p className="text-sm text-muted-foreground">Proprietário</p>
-                <p className="mt-1 font-medium">
-                  {imovel.usuario?.nome ?? "—"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {imovel.usuario?.email}
-                </p>
               </CardContent>
             </Card>
           </div>

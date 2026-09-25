@@ -21,10 +21,12 @@ function DateInput({
   value,
   onChange,
   onBlur,
+  maxDate,
 }: {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
   onBlur: () => void;
+  maxDate?: string;
 }) {
   const [display, setDisplay] = React.useState(() => formatIsoToDateBR(value));
   const [ultimoValor, setUltimoValor] = React.useState(value);
@@ -77,7 +79,7 @@ function DateInput({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-3" align="start">
-          <Calendar value={value} onSelect={selecionarNoCalendario} />
+          <Calendar value={value} onSelect={selecionarNoCalendario} maxDate={maxDate} />
         </PopoverContent>
       </Popover>
     </div>
@@ -89,11 +91,14 @@ export function DateField<T extends FieldValues>({
   name,
   label,
   className,
+  maxDate,
 }: {
   control: Control<T>;
   name: FieldPath<T>;
   label: string;
   className?: string;
+  /** Datas (yyyy-MM-dd) após esta ficam desabilitadas no calendário. */
+  maxDate?: string;
 }) {
   return (
     <FormField
@@ -107,6 +112,7 @@ export function DateField<T extends FieldValues>({
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
+              maxDate={maxDate}
             />
           </FormControl>
           <FormMessage />
