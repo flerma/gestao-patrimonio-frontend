@@ -116,6 +116,7 @@ const schema = z
       .min(1, "Entre 1 e 31")
       .max(31, "Entre 1 e 31"),
     dataPrimeiraParcela: z.string().min(1, "Informe a data da primeira parcela"),
+    valorPrimeiraParcela: z.number().positive("O valor deve ser maior que zero").optional(),
     indiceReajuste: z.enum(INDICE_REAJUSTE),
     percentualReajuste: z.number().min(0).optional(),
     periodoReajuste: z.number().int().positive().optional(),
@@ -148,6 +149,7 @@ function toDefaults(contrato?: ContratoResponse): Partial<FormValues> {
     valorAluguel: contrato?.valorAluguel,
     diaVencimento: contrato?.diaVencimento ?? 5,
     dataPrimeiraParcela: contrato?.dataPrimeiraParcela ?? "",
+    valorPrimeiraParcela: contrato?.valorPrimeiraParcela ?? undefined,
     indiceReajuste: contrato?.indiceReajuste ?? "IPCA",
     percentualReajuste: contrato?.percentualReajuste ?? undefined,
     periodoReajuste: contrato?.periodoReajuste ?? 12,
@@ -190,6 +192,22 @@ export function ContratoForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataInicio, diaVencimento]);
 
+  const valorAluguel = form.watch("valorAluguel");
+  const primeiraExecucaoValorRef = React.useRef(true);
+  React.useEffect(() => {
+    if (primeiraExecucaoValorRef.current) {
+      // Não sobrescreve o valor carregado (edição) nem o campo vazio
+      // (criação) já na montagem — só reage a mudanças feitas pelo usuário.
+      primeiraExecucaoValorRef.current = false;
+      return;
+    }
+    if (form.formState.dirtyFields.valorPrimeiraParcela) return;
+    if (valorAluguel !== undefined) {
+      form.setValue("valorPrimeiraParcela", valorAluguel);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valorAluguel]);
+
   type EtapaConfirmacao = "parcelas-anteriores" | "vencimento-futuro";
   const [confirmacao, setConfirmacao] = React.useState<{
     payload: ContratoRequest;
@@ -212,6 +230,7 @@ export function ContratoForm({
       valorAluguel: values.valorAluguel,
       diaVencimento: values.diaVencimento,
       dataPrimeiraParcela: values.dataPrimeiraParcela,
+      valorPrimeiraParcela: values.valorPrimeiraParcela,
       indiceReajuste: values.indiceReajuste,
       percentualReajuste: values.percentualReajuste,
       periodoReajuste: values.periodoReajuste,
@@ -326,6 +345,11 @@ export function ContratoForm({
               control={form.control}
               name="dataPrimeiraParcela"
               label="Data da primeira parcela"
+            />
+            <MoneyField
+              control={form.control}
+              name="valorPrimeiraParcela"
+              label="Valor da primeira parcela (R$, opcional)"
             />
           </CardContent>
         </Card>
