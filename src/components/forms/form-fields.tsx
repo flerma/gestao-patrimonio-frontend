@@ -42,7 +42,8 @@ export function TextField<T extends FieldValues>({
   placeholder,
   type = "text",
   className,
-}: BaseProps<T> & { type?: string }) {
+  disabled,
+}: BaseProps<T> & { type?: string; disabled?: boolean }) {
   return (
     <FormField
       control={control}
@@ -54,6 +55,7 @@ export function TextField<T extends FieldValues>({
             <Input
               type={type}
               placeholder={placeholder}
+              disabled={disabled}
               {...field}
               value={field.value ?? ""}
               onChange={(e) =>
