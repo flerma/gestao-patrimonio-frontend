@@ -33,9 +33,15 @@ function DateInput({
   // Ressincroniza durante a renderização (sem efeito) quando o valor muda
   // por outro motivo que não a digitação aqui — ex.: reset do formulário ao
   // carregar um registro para edição, ou preenchimento automático.
-  if (value !== ultimoValor && parseDateBRToIso(display) !== value) {
+  // `ultimoValor` precisa ser atualizado sempre que o valor externo mudar —
+  // mesmo quando o display já reflete esse valor (ex.: logo após a própria
+  // digitação) — senão uma mudança externa futura para esse mesmo valor
+  // "antigo" passa despercebida.
+  if (value !== ultimoValor) {
     setUltimoValor(value);
-    setDisplay(formatIsoToDateBR(value));
+    if (parseDateBRToIso(display) !== value) {
+      setDisplay(formatIsoToDateBR(value));
+    }
   }
 
   const selecionarNoCalendario = (iso: string) => {
