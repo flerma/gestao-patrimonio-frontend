@@ -142,7 +142,7 @@ function toDefaults(contrato?: ContratoResponse): Partial<FormValues> {
     imovelId: contrato?.imovel?.id ?? "",
     inquilinoId: contrato?.inquilino?.id ?? "",
     tipo: contrato?.tipo ?? "RESIDENCIAL",
-    status: contrato?.status ?? "RASCUNHO",
+    status: contrato?.status ?? "ATIVO",
     dataInicio: contrato?.dataInicio ?? "",
     dataFim: contrato?.dataFim ?? "",
     valorAluguel: contrato?.valorAluguel,
