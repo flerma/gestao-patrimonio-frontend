@@ -42,7 +42,10 @@ export default function ImovelDetalhePage() {
 
   const percentualRetorno =
     imovel && imovel.valorAquisicao > 0
-      ? (imovel.valorAtual - imovel.valorAquisicao) / imovel.valorAquisicao
+      ? (imovel.valorAtual -
+          imovel.valorAquisicao +
+          (imovel.totalAlugueisPagos ?? 0)) /
+        imovel.valorAquisicao
       : null;
 
   return (
@@ -112,7 +115,7 @@ export default function ImovelDetalhePage() {
                   {formatPercent(percentualRetorno)}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Desde a aquisição
+                  Valorização + aluguéis pagos, desde a aquisição
                 </p>
               </CardContent>
             </Card>
