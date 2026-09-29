@@ -106,6 +106,18 @@ function sugerirDataPrimeiraParcela(
   return `${anoAlvo}-${String(mesAlvo).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
 }
 
+/** Primeira parcela deve vencer, no mínimo, 30 dias após o início da vigência. */
+const DIAS_MINIMOS_PRIMEIRA_PARCELA = 30;
+
+/** Soma dias a uma data yyyy-MM-dd, retornando yyyy-MM-dd (ou undefined se inválida). */
+function somarDiasIso(data: string, dias: number): string | undefined {
+  const match = data.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return undefined;
+  const [, anoStr, mesStr, diaStr] = match;
+  const d = new Date(Number(anoStr), Number(mesStr) - 1, Number(diaStr) + dias);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 const schema = z
   .object({
     imovelId: z.string().min(1, "Selecione o imóvel"),
@@ -136,10 +148,13 @@ const schema = z
     { path: ["dataFim"], message: "A data fim deve ser posterior ao início" },
   )
   .refine(
-    (data) => data.dataPrimeiraParcela >= data.dataInicio,
+    (data) => {
+      const minima = somarDiasIso(data.dataInicio, DIAS_MINIMOS_PRIMEIRA_PARCELA);
+      return !minima || data.dataPrimeiraParcela >= minima;
+    },
     {
       path: ["dataPrimeiraParcela"],
-      message: "A data da primeira parcela não pode ser anterior ao início da vigência",
+      message: `A data da primeira parcela deve ser, no mínimo, ${DIAS_MINIMOS_PRIMEIRA_PARCELA} dias após o início da vigência`,
     },
   )
   .refine(
@@ -193,18 +208,19 @@ export function ContratoForm({
   const diaVencimento = form.watch("diaVencimento");
   const indiceReajuste = form.watch("indiceReajuste");
   const tipoGarantia = form.watch("tipoGarantia");
-  const primeiraExecucaoSugestaoRef = React.useRef(true);
+  // Recalcula a data da primeira parcela sempre que o início da vigência ou
+  // o dia de vencimento mudam (criação e edição) — inclusive se o usuário já
+  // tiver alterado a data manualmente. Compara com os valores anteriores em vez
+  // de pular a "primeira execução", para não sobrescrever o valor carregado na
+  // montagem (nem sob a dupla execução de efeitos do StrictMode).
+  const anterioresSugestaoRef = React.useRef({ dataInicio, diaVencimento });
   React.useEffect(() => {
-    if (primeiraExecucaoSugestaoRef.current) {
-      // Não sobrescreve o valor carregado (edição) nem o campo vazio
-      // (criação) já na montagem — só reage a mudanças feitas pelo usuário.
-      primeiraExecucaoSugestaoRef.current = false;
-      return;
-    }
-    if (form.formState.dirtyFields.dataPrimeiraParcela) return;
+    const anteriores = anterioresSugestaoRef.current;
+    anterioresSugestaoRef.current = { dataInicio, diaVencimento };
+    if (anteriores.dataInicio === dataInicio && anteriores.diaVencimento === diaVencimento) return;
     const sugestao = sugerirDataPrimeiraParcela(dataInicio, diaVencimento);
     if (sugestao) {
-      form.setValue("dataPrimeiraParcela", sugestao);
+      form.setValue("dataPrimeiraParcela", sugestao, { shouldValidate: form.formState.isSubmitted });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataInicio, diaVencimento]);
