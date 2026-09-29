@@ -234,6 +234,9 @@ export function ContratoForm({
       primeiraExecucaoValorRef.current = false;
       return;
     }
+    // Só na inclusão: na alteração de um contrato existente, valor do aluguel
+    // e valor da primeira parcela são campos independentes.
+    if (contrato) return;
     if (form.formState.dirtyFields.valorPrimeiraParcela) return;
     if (valorAluguel !== undefined) {
       form.setValue("valorPrimeiraParcela", valorAluguel);
