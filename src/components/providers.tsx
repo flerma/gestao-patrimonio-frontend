@@ -23,6 +23,7 @@ interface AuthContextValue {
   carregando: boolean;
   refetch: () => Promise<void>;
   login: (usuario: string, senha: string) => Promise<AuthUsuario>;
+  loginGoogle: (idToken: string) => Promise<AuthUsuario>;
   logout: () => Promise<void>;
 }
 
@@ -31,6 +32,9 @@ const AuthContext = React.createContext<AuthContextValue>({
   carregando: true,
   refetch: async () => {},
   login: async () => {
+    throw new Error("AuthProvider ausente");
+  },
+  loginGoogle: async () => {
     throw new Error("AuthProvider ausente");
   },
   logout: async () => {},
@@ -71,6 +75,12 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     return logado;
   }, []);
 
+  const loginGoogle = React.useCallback(async (idToken: string) => {
+    const { usuario: logado } = await authApi.loginGoogle(idToken);
+    setUsuario(logado);
+    return logado;
+  }, []);
+
   const logout = React.useCallback(async () => {
     try {
       await authApi.logout();
@@ -82,8 +92,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   const value = React.useMemo(
-    () => ({ usuario, carregando, refetch, login, logout }),
-    [usuario, carregando, refetch, login, logout],
+    () => ({ usuario, carregando, refetch, login, loginGoogle, logout }),
+    [usuario, carregando, refetch, login, loginGoogle, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

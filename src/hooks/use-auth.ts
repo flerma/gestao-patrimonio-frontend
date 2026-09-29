@@ -28,6 +28,16 @@ export function useLogin() {
   });
 }
 
+/** Mutation de login com Google — recebe o ID token entregue pelo botão do Google. */
+export function useLoginGoogle() {
+  const { loginGoogle } = useAuth();
+  return useMutation({
+    mutationFn: (idToken: string) => loginGoogle(idToken),
+    onError: (error) =>
+      toast.error(errorMessage(error, "Não foi possível entrar com o Google.")),
+  });
+}
+
 export function useRegistrar() {
   return useMutation({
     mutationFn: (body: RegistrarRequest) => authApi.registrar(body),

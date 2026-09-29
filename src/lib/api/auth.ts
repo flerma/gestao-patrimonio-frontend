@@ -43,6 +43,12 @@ export const authApi = {
       method: "POST",
       body,
     }),
+  /** Login (e cadastro no primeiro acesso) com o ID token do Google. */
+  loginGoogle: (idToken: string) =>
+    apiFetch<{ usuario: AuthUsuario }>(`${BASE}/google`, {
+      method: "POST",
+      body: { idToken },
+    }),
   registrar: (body: RegistrarRequest) =>
     apiFetch<AuthUsuario>(`${BASE}/registrar`, { method: "POST", body }),
   logout: () => apiFetch<void>(`${BASE}/logout`, { method: "POST" }),

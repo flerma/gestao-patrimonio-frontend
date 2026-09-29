@@ -18,6 +18,7 @@ import {
 import { Form } from "@/components/ui/form";
 import { TextField } from "@/components/forms/form-fields";
 import { useLogin } from "@/hooks/use-auth";
+import { GoogleLoginButton } from "@/components/auth/google-login-button";
 
 const schema = z.object({
   usuario: z.string().trim().min(1, "Informe o usuário"),
@@ -68,6 +69,7 @@ export default function LoginPage() {
             </Button>
           </form>
         </Form>
+        <GoogleLoginButton onSuccess={() => router.push("/")} />
       </CardContent>
     </Card>
   );
