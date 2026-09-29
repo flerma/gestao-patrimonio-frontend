@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "@/lib/auth/cookies";
+import { ROTA_POLITICA_PRIVACIDADE, ROTA_TERMOS_USO } from "@/lib/legal";
 
 /**
  * Guarda de sessão "otimista": só checa a PRESENÇA dos cookies de sessão,
@@ -17,9 +18,15 @@ import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from "@/lib/auth/cookies";
  */
 
 const AUTH_PATHS = ["/login", "/cadastro"];
+/** Páginas abertas a qualquer visitante, com ou sem sessão (exigidas pelo Google Auth Platform). */
+const PUBLIC_PATHS = [ROTA_POLITICA_PRIVACIDADE, ROTA_TERMOS_USO];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (PUBLIC_PATHS.includes(pathname)) {
+    return NextResponse.next();
+  }
 
   const hasSession =
     request.cookies.has(ACCESS_TOKEN_COOKIE) ||
