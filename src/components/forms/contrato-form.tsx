@@ -23,6 +23,7 @@ import {
 import { useSalvarContrato } from "@/hooks/use-contratos";
 import { useImoveis } from "@/hooks/use-imoveis";
 import { useInquilinos } from "@/hooks/use-inquilinos";
+import { usePagamentosAluguel } from "@/hooks/use-pagamentos-aluguel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
@@ -64,6 +65,12 @@ function competenciaAnteriorAoMesAtual(dataInicio: string): boolean {
 
 function ultimoDiaDoMes(ano: number, mesUm: number): number {
   return new Date(ano, mesUm, 0).getDate();
+}
+
+/** Mês atual no formato "yyyy-MM", comparável lexicograficamente com IsoYearMonth. */
+function mesAtualIso(): string {
+  const hoje = new Date();
+  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
 }
 
 /**
@@ -175,6 +182,7 @@ export function ContratoForm({
   const salvar = useSalvarContrato(contrato?.id);
   const { data: imoveis } = useImoveis();
   const { data: inquilinos } = useInquilinos();
+  const { data: pagamentos } = usePagamentosAluguel(contrato?.id, Boolean(contrato?.id));
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -217,19 +225,28 @@ export function ContratoForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [valorAluguel]);
 
-  type EtapaConfirmacao = "parcelas-anteriores" | "vencimento-futuro";
+  type EtapaConfirmacao = "parcelas-anteriores" | "valor-aluguel" | "vencimento-futuro";
   const [confirmacao, setConfirmacao] = React.useState<{
     payload: ContratoRequest;
-    etapa: EtapaConfirmacao;
-    precisaVencimentoFuturo: boolean;
+    fila: EtapaConfirmacao[];
   } | null>(null);
 
   const enviar = (payload: ContratoRequest) => {
     salvar.mutate(payload, { onSuccess: () => router.push("/contratos") });
   };
 
+  /** Envia se não houver mais etapas pendentes; senão, abre o próximo diálogo da fila. */
+  const avancar = (payload: ContratoRequest, filaRestante: EtapaConfirmacao[]) => {
+    if (filaRestante.length === 0) {
+      enviar(payload);
+      setConfirmacao(null);
+      return;
+    }
+    setConfirmacao({ payload, fila: filaRestante });
+  };
+
   const onSubmit = (values: FormValues) => {
-    const payload: ContratoRequest = {
+    let payload: ContratoRequest = {
       imovelId: values.imovelId,
       inquilinoId: values.inquilinoId,
       tipo: values.tipo,
@@ -254,42 +271,49 @@ export function ContratoForm({
     const precisaVencimentoFuturo =
       contrato !== undefined && contrato.diaVencimento !== values.diaVencimento;
 
-    if (precisaParcelasAnteriores) {
-      setConfirmacao({ payload, etapa: "parcelas-anteriores", precisaVencimentoFuturo });
-      return;
+    const valorAluguelMudou =
+      contrato !== undefined && contrato.valorAluguel !== values.valorAluguel;
+    const existemParcelasAnterioresAoMesAtual = (pagamentos ?? []).some(
+      (p) => p.competencia < mesAtualIso(),
+    );
+    const precisaValorAluguel = valorAluguelMudou && existemParcelasAnterioresAoMesAtual;
+    if (valorAluguelMudou && !precisaValorAluguel) {
+      // Não há parcelas anteriores ao mês atual: não há distinção entre
+      // "todas" e "a partir do mês atual" — atualiza direto, sem perguntar.
+      payload = { ...payload, atualizarValorParcelas: true };
     }
-    if (precisaVencimentoFuturo) {
-      setConfirmacao({ payload, etapa: "vencimento-futuro", precisaVencimentoFuturo: false });
-      return;
-    }
-    enviar(payload);
+
+    const fila: EtapaConfirmacao[] = [
+      ...(precisaParcelasAnteriores ? (["parcelas-anteriores"] as const) : []),
+      ...(precisaValorAluguel ? (["valor-aluguel"] as const) : []),
+      ...(precisaVencimentoFuturo ? (["vencimento-futuro"] as const) : []),
+    ];
+
+    avancar(payload, fila);
   };
 
   const confirmarParcelasAnteriores = (marcarComoPagas: boolean) => {
     if (!confirmacao) return;
-    const payloadAtualizado: ContratoRequest = {
-      ...confirmacao.payload,
-      marcarParcelasAnterioresComoPagas: marcarComoPagas,
-    };
-    if (confirmacao.precisaVencimentoFuturo) {
-      setConfirmacao({
-        payload: payloadAtualizado,
-        etapa: "vencimento-futuro",
-        precisaVencimentoFuturo: false,
-      });
-      return;
-    }
-    enviar(payloadAtualizado);
-    setConfirmacao(null);
+    avancar(
+      { ...confirmacao.payload, marcarParcelasAnterioresComoPagas: marcarComoPagas },
+      confirmacao.fila.slice(1),
+    );
+  };
+
+  const confirmarValorAluguel = (todasParcelas: boolean) => {
+    if (!confirmacao) return;
+    avancar(
+      { ...confirmacao.payload, atualizarValorParcelas: todasParcelas },
+      confirmacao.fila.slice(1),
+    );
   };
 
   const confirmarVencimentoFuturo = (atualizar: boolean) => {
     if (!confirmacao) return;
-    enviar({
-      ...confirmacao.payload,
-      atualizarVencimentoParcelasFuturas: atualizar,
-    });
-    setConfirmacao(null);
+    avancar(
+      { ...confirmacao.payload, atualizarVencimentoParcelasFuturas: atualizar },
+      confirmacao.fila.slice(1),
+    );
   };
 
   return (
@@ -426,7 +450,7 @@ export function ContratoForm({
       </form>
 
       <Dialog
-        open={confirmacao?.etapa === "parcelas-anteriores"}
+        open={confirmacao?.fila[0] === "parcelas-anteriores"}
         onOpenChange={(open) => !open && setConfirmacao(null)}
       >
         <DialogContent>
@@ -454,7 +478,35 @@ export function ContratoForm({
       </Dialog>
 
       <Dialog
-        open={confirmacao?.etapa === "vencimento-futuro"}
+        open={confirmacao?.fila[0] === "valor-aluguel"}
+        onOpenChange={(open) => !open && setConfirmacao(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Atualizar valor das parcelas de aluguel?</DialogTitle>
+            <DialogDescription>
+              O valor do aluguel foi alterado e existem parcelas com
+              competência anterior ao mês atual. Deseja atualizar o valor
+              de todas as parcelas ou somente das parcelas a partir do mês
+              atual?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => confirmarValorAluguel(false)}
+            >
+              Somente a partir do mês atual
+            </Button>
+            <Button onClick={() => confirmarValorAluguel(true)}>
+              Todas as parcelas
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={confirmacao?.fila[0] === "vencimento-futuro"}
         onOpenChange={(open) => !open && setConfirmacao(null)}
       >
         <DialogContent>
