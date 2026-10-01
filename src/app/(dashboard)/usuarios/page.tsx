@@ -142,6 +142,7 @@ export default function UsuariosPage() {
                       <RowActions
                         editHref={`/usuarios/${usuario.id}`}
                         itemLabel={usuario.nome}
+                        warning="Todos os dados deste usuário — imóveis, inquilinos, contratos e aluguéis (inclusive o histórico de pagamentos) — também serão excluídos. Esta ação não pode ser desfeita."
                         deleting={excluir.isPending}
                         onDelete={() => excluir.mutate(usuario.id)}
                       />

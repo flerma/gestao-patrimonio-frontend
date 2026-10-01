@@ -26,6 +26,7 @@ export function RowActions({
   itemLabel,
   deleting = false,
   blockedReason = null,
+  warning = null,
 }: {
   editHref: string;
   onDelete: () => void;
@@ -33,6 +34,8 @@ export function RowActions({
   deleting?: boolean;
   /** Quando informado, a exclusão é bloqueada e o texto é exibido no diálogo. */
   blockedReason?: string | null;
+  /** Aviso extra exibido no diálogo de confirmação (ex.: exclusão em cascata). */
+  warning?: string | null;
 }) {
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const isBlocked = Boolean(blockedReason);
@@ -78,7 +81,15 @@ export function RowActions({
               ) : (
                 <>
                   Tem certeza de que deseja excluir{" "}
-                  <strong>{itemLabel}</strong>? Esta ação não pode ser desfeita.
+                  <strong>{itemLabel}</strong>?{" "}
+                  {warning ? (
+                    <span className="mt-2 flex items-start gap-2 text-destructive">
+                      <ShieldAlert className="mt-0.5 size-4 shrink-0" />
+                      <span>{warning}</span>
+                    </span>
+                  ) : (
+                    "Esta ação não pode ser desfeita."
+                  )}
                 </>
               )}
             </DialogDescription>
