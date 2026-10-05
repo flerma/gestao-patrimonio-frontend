@@ -17,7 +17,7 @@ import { ROTA_POLITICA_PRIVACIDADE, ROTA_TERMOS_USO } from "@/lib/legal";
  * atual.
  */
 
-const AUTH_PATHS = ["/login", "/cadastro"];
+const AUTH_PATHS = ["/login", "/cadastro", "/esqueci-senha", "/redefinir-senha"];
 /** Páginas abertas a qualquer visitante, com ou sem sessão (exigidas pelo Google Auth Platform). */
 const PUBLIC_PATHS = [ROTA_POLITICA_PRIVACIDADE, ROTA_TERMOS_USO];
 

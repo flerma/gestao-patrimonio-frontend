@@ -23,6 +23,13 @@ export interface LoginRequest {
   senha: string;
 }
 
+export interface RedefinirSenhaRequest {
+  email: string;
+  codigo: string;
+  novaSenha: string;
+  confirmarSenha: string;
+}
+
 export interface RegistrarRequest {
   nome: string;
   email: string;
@@ -52,5 +59,10 @@ export const authApi = {
   registrar: (body: RegistrarRequest) =>
     apiFetch<AuthUsuario>(`${BASE}/registrar`, { method: "POST", body }),
   logout: () => apiFetch<void>(`${BASE}/logout`, { method: "POST" }),
+  /** Envia (ou reenvia) o código de redefinição de senha ao e-mail. */
+  esqueciSenha: (email: string) =>
+    apiFetch<void>(`${BASE}/esqueci-senha`, { method: "POST", body: { email } }),
+  redefinirSenha: (body: RedefinirSenhaRequest) =>
+    apiFetch<void>(`${BASE}/redefinir-senha`, { method: "POST", body }),
   me: () => apiFetch<{ usuario: AuthUsuario }>(`${BASE}/me`),
 };

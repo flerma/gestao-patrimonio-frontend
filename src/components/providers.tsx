@@ -106,7 +106,7 @@ function handleGlobalQueryError(error: unknown) {
     typeof window !== "undefined"
   ) {
     const { pathname } = window.location;
-    if (pathname !== "/login" && pathname !== "/cadastro") {
+    if (!["/login", "/cadastro", "/esqueci-senha", "/redefinir-senha"].includes(pathname)) {
       window.location.href = "/login";
     }
   }

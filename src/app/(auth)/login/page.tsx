@@ -67,6 +67,14 @@ export default function LoginPage() {
               label="Senha"
               type="password"
             />
+            <div className="-mt-2 flex justify-end">
+              <Link
+                href="/esqueci-senha"
+                className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Esqueceu a sua senha?
+              </Link>
+            </div>
             <Button type="submit" className="w-full" disabled={login.isPending}>
               {login.isPending ? "Entrando…" : "Login"}
             </Button>

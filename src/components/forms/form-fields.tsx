@@ -43,7 +43,13 @@ export function TextField<T extends FieldValues>({
   type = "text",
   className,
   disabled,
-}: BaseProps<T> & { type?: string; disabled?: boolean }) {
+  autoComplete,
+}: BaseProps<T> & {
+  type?: string;
+  disabled?: boolean;
+  /** Dica para o navegador (ex.: "one-time-code", "new-password") — evita autopreenchimento errado. */
+  autoComplete?: string;
+}) {
   return (
     <FormField
       control={control}
@@ -56,6 +62,7 @@ export function TextField<T extends FieldValues>({
               type={type}
               placeholder={placeholder}
               disabled={disabled}
+              autoComplete={autoComplete}
               {...field}
               value={field.value ?? ""}
               onChange={(e) =>

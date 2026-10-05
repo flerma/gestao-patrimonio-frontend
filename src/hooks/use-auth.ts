@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/components/providers";
 import { authApi, ApiError } from "@/lib/api";
 import type { RegistrarRequest } from "@/lib/api";
+import type { RedefinirSenhaRequest } from "@/lib/api/auth";
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof ApiError ? error.message : fallback;
@@ -43,5 +44,25 @@ export function useRegistrar() {
     mutationFn: (body: RegistrarRequest) => authApi.registrar(body),
     onError: (error) =>
       toast.error(errorMessage(error, "Não foi possível concluir o cadastro.")),
+  });
+}
+
+/**
+ * Envia (ou reenvia) o código de redefinição de senha. Com `silencioso`, não
+ * mostra toast de erro (a tela exibe a mensagem no próprio formulário).
+ */
+export function useSolicitarCodigoSenha({ silencioso = false }: { silencioso?: boolean } = {}) {
+  return useMutation({
+    mutationFn: (email: string) => authApi.esqueciSenha(email),
+    onError: (error) => {
+      if (!silencioso) toast.error(errorMessage(error, "Não foi possível enviar o código."));
+    },
+  });
+}
+
+/** Confere o código e grava a nova senha (erros tratados pela tela). */
+export function useRedefinirSenha() {
+  return useMutation({
+    mutationFn: (body: RedefinirSenhaRequest) => authApi.redefinirSenha(body),
   });
 }
