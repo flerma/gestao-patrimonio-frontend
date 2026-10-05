@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,7 @@ import { Form } from "@/components/ui/form";
 import { TextField } from "@/components/forms/form-fields";
 import { useSolicitarCodigoSenha } from "@/hooks/use-auth";
 import { guardarEmailRedefinicao } from "@/lib/auth/redefinicao-senha";
+import { ApiError } from "@/lib/api";
 import logo from "../../icon.png";
 
 const schema = z.object({
@@ -29,7 +31,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function EsqueciSenhaPage() {
   const router = useRouter();
-  const solicitar = useSolicitarCodigoSenha();
+  const solicitar = useSolicitarCodigoSenha({ silencioso: true });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -41,6 +43,14 @@ export default function EsqueciSenhaPage() {
       onSuccess: () => {
         guardarEmailRedefinicao(email);
         router.push("/redefinir-senha");
+      },
+      onError: (error) => {
+        const body = error instanceof ApiError ? (error.body as { campo?: string; message?: string } | null) : null;
+        if (body?.campo === "email") {
+          form.setError("email", { message: body.message ?? "E-mail não cadastrado." });
+        } else {
+          toast.error(error instanceof ApiError ? error.message : "Não foi possível enviar o código.");
+        }
       },
     });
   };
