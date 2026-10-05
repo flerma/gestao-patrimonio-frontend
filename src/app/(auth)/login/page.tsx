@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Building2 } from "lucide-react";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,7 @@ import { Form } from "@/components/ui/form";
 import { TextField } from "@/components/forms/form-fields";
 import { useLogin } from "@/hooks/use-auth";
 import { GoogleLoginButton } from "@/components/auth/google-login-button";
+import logo from "../../icon.png";
 
 const schema = z.object({
   usuario: z.string().trim().min(1, "Informe o usuário"),
@@ -43,9 +44,14 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader className="items-center text-center">
-        <span className="mb-2 flex size-11 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Building2 className="size-6" />
-        </span>
+        <Image
+          src={logo}
+          alt="Logo Gestão Seu Patrimônio"
+          width={64}
+          height={64}
+          priority
+          className="mb-2 size-16"
+        />
         <CardTitle className="text-xl">Entrar</CardTitle>
         <CardDescription>
           Acesse o painel de gestão de patrimônio imobiliário.
