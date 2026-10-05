@@ -44,7 +44,7 @@ function NavItemBody({
         </span>
       )}
       {!pending && active && (
-        <span className="ml-auto size-1.5 shrink-0 rounded-full bg-primary" />
+        <span className="ml-auto size-1.5 shrink-0 rounded-full bg-gold" />
       )}
     </span>
   );

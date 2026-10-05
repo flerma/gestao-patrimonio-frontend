@@ -59,7 +59,7 @@ function Brand({
         className,
       )}
     >
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gold text-gold-foreground">
         <Building2 className="size-5" />
       </span>
       {!collapsed && (
@@ -146,7 +146,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex w-72 flex-col p-0">
+            <SheetContent side="left" className="flex w-72 flex-col border-sidebar-border bg-sidebar p-0 text-sidebar-foreground">
               <SheetTitle className="sr-only">Menu de navegação</SheetTitle>
               <Brand />
               <AuthStatus />

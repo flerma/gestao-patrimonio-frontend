@@ -99,7 +99,7 @@ export function GoogleLoginButton({ onSuccess }: { onSuccess: () => void }) {
         <p className="text-center text-sm text-muted-foreground">Entrando com o Google…</p>
       )}
       <Script
-        src="https://accounts.google.com/gsi/client"
+        src="https://accounts.google.com/gsi/client?hl=pt-BR"
         strategy="afterInteractive"
         onReady={renderizarBotao}
       />
